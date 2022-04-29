@@ -6,13 +6,17 @@ import 'package:intl/intl.dart';
 /// A class to store all performance test results for a group
 ///
 class PerfTestFormat {
-  /// The string indicating the result is the same instead of 100%
+  /// The character for the border
   ///
-  final String identical;
+  final String barChar;
 
-  /// The symbol for infinity
+  /// The character for the border
   ///
-  final String infinite;
+  final String borderChar;
+
+  /// The character for the corners of the border
+  ///
+  final String cornerChar;
 
   /// The format for dates
   ///
@@ -22,6 +26,18 @@ class PerfTestFormat {
   ///
   late final DateFormat dateTimeFormat;
 
+  /// The field separator in case of FSV output
+  ///
+  String fieldSeparator;
+
+  /// The string indicating the result is the same instead of 100%
+  ///
+  final String identical;
+
+  /// The symbol for infinity
+  ///
+  final String infinite;
+
   /// The format for numbers
   ///
   late final NumberFormat numberFormat;
@@ -30,6 +46,14 @@ class PerfTestFormat {
   ///
   late final NumberFormat percentFormat;
 
+  /// The embracing quote character
+  ///
+  final String quote;
+
+  /// The escaped version of [_quote]
+  ///
+  final String quoteEscaped;
+
   /// The format for times
   ///
   late final DateFormat timeFormat;
@@ -37,13 +61,19 @@ class PerfTestFormat {
   /// The constructor
   ///
   PerfTestFormat(
-      {DateFormat? dateFormat,
+      {this.barChar = '|',
+      this.borderChar = '-',
+      this.cornerChar = '+',
+      this.fieldSeparator = '',
+      this.identical = '==',
+      this.infinite = '??',
+      this.quote = '"',
+      this.quoteEscaped = '""',
+      DateFormat? dateFormat,
       DateFormat? dateTimeFormat,
       NumberFormat? numberFormat,
       NumberFormat? percentFormat,
-      DateFormat? timeFormat,
-      this.identical = '==',
-      this.infinite = '??'}) {
+      DateFormat? timeFormat}) {
     this.dateFormat = dateFormat ?? DateFormat.yMMMMd();
     this.dateTimeFormat = dateFormat ?? DateFormat();
     this.numberFormat = numberFormat ?? NumberFormat();

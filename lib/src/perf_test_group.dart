@@ -1,48 +1,65 @@
 // Copyright (c) 2022, Alexander Iurovetski
 // All rights reserved under MIT license (see LICENSE file)
 
-import 'package:collection/collection.dart';
 import 'package:perf_test/perf_test.dart';
 
 /// A class to group multiple tests and calculate mutual rates
 ///
 class PerfTestGroup {
-  /// The reference to the result object
+  /// A flag indicating that the stopwatch is started and
+  /// stopped by the user rather than by this class object
   ///
-  PerfTestGroupResult? result;
+  final bool isMyStopwatch;
 
-  /// The actual user-defined procedure to display group result
+  /// A flag indicating that no output is expected
   ///
-  final PerfTestGroupShowProc showProc;
-
-  /// The group-wide stopwatch used to measure performance
-  ///
-  final Stopwatch? stopwatch;
-
-  /// The actual number of the test iterations upon execution completion
-  ///
-  final tests = <PerfTest>[];
+  final bool isQuiet;
 
   /// The name of the group
   ///
   final String name;
 
-  /// The actual user-defined procedure to display every test result
+  /// The reference to the result object
   ///
-  final PerfTestShowProc testShowProc;
+  late final PerfTestGroupResult result;
+
+  /// The actual user-defined procedure to display group result
+  ///
+  late final PerfTestGroupShow show;
+
+  /// The group-wide stopwatch used to measure performance
+  ///
+  late final Stopwatch? stopwatch;
+
+  /// The actual number of the test iterations upon execution completion
+  ///
+  final tests = <PerfTest>[];
 
   /// The constructor
   ///
   PerfTestGroup(this.name,
-      {this.stopwatch,
-      this.result,
-      this.showProc = defaultGroupShowProc,
-      this.testShowProc = PerfTestGroupResult.defaultTestShowProc});
+      {Stopwatch? stopwatch,
+      PerfTestPrinter? printer,
+      PerfTestGroupResult? result,
+      PerfTestGroupShow? show,
+      String? fieldSeparator,
+      this.isMyStopwatch = false,
+      this.isQuiet = false}) {
+    this.result = result ?? PerfTestGroupResult(this);
+
+    if (fieldSeparator != null) {
+      this.result.format.fieldSeparator = fieldSeparator;
+    }
+
+    this.show = show ?? PerfTestGroupShow(this.result, printer: printer);
+    this.stopwatch = stopwatch ?? Stopwatch();
+  }
 
   /// The default show proc
   ///
   void add(PerfTest test, {bool isDefault = false}) {
     test.group = this;
+    test.isMyStopwatch = isMyStopwatch;
 
     if (stopwatch != null) {
       test.stopwatch = stopwatch!;
@@ -51,45 +68,39 @@ class PerfTestGroup {
     tests.add(test);
   }
 
-  /// If no adhesive test exists or there are only two tests or less
-  /// then make them all adhesive
+  /// If no magnetic test exists or there are only two tests or less
+  /// then make them all magnetic
   ///
-  void adjustAdhesive() {
+  void adjustMagnetic() {
     var count = tests.length;
-    var hasAdhesive = false;
+    var hasMagnetic = false;
 
     if (count > 2) {
       for (var i = 0; i < count; i++) {
-        if (tests[i].isMagnet) {
-          hasAdhesive = true;
+        if (tests[i].isMagnetic) {
+          hasMagnetic = true;
           return;
         }
       }
     }
-    if (!hasAdhesive) {
+    if (!hasMagnetic) {
       for (var i = 0; i < count; i++) {
-        tests[i].isMagnet = true;
+        tests[i].isMagnetic = true;
       }
     }
   }
 
-  /// The default group show proc
-  ///
-  static void defaultGroupShowProc(PerfTestGroup group) =>
-      PerfTestGroupResult(group).defaultShowProc();
-
   /// The runner
   ///
   void exec({int? laps, Duration? span}) {
-    adjustAdhesive();
+    adjustMagnetic();
 
     for (var i = 0, n = tests.length; i < n; i++) {
       tests[i].exec(laps: laps, span: span);
     }
-    showProc(this);
-  }
 
-  /// The silent show proc
-  ///
-  static void noShowProc(Object group) {}
+    if (!isQuiet) {
+      show.exec();
+    }
+  }
 }

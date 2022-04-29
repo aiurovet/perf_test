@@ -6,6 +6,7 @@
   "configurations": [
     { "name":    "0.5 sec", "args": ["-t",      "0.5"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
     { "name":    "1.0 sec", "args": ["-t",        "1"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
+    { "name":      "1,000", "args": ["-c",     "1000"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
     { "name":  "1,000,000", "args": ["-c",  "1000000"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
     { "name": "10,000,000", "args": ["-c", "10000000"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
   ]

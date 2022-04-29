@@ -19,7 +19,12 @@ class PerfTest {
 
   /// Can engage any element in performance comparison
   ///
-  bool isMagnet;
+  bool isMagnetic;
+
+  /// A flag indicating that the stopwatch is started and
+  /// stopped by a user rather than by this class object
+  ///
+  bool isMyStopwatch;
 
   /// The actual number of the test iterations upon execution completion
   ///
@@ -50,7 +55,8 @@ class PerfTest {
   PerfTest(this.name,
       {this.group,
       Stopwatch? stopwatch,
-      this.isMagnet = false,
+      this.isMagnetic = false,
+      this.isMyStopwatch = false,
       this.testProc = emptyTestProc}) {
     if (stopwatch != null) {
       this.stopwatch = stopwatch;
@@ -59,11 +65,8 @@ class PerfTest {
 
   /// The default show proc
   ///
-  static void defaultShowProc(PerfTest test) {
-    final t = test.span;
-    final c = numberFormat.format(test.laps);
-    print('${test.name} | $c | $t');
-  }
+  static void defaultShowProc(PerfTest test) =>
+      print(test.getDefaultShowRecord());
 
   /// The default dummy test proc
   ///
@@ -72,18 +75,32 @@ class PerfTest {
   /// The test runner
   ///
   PerfTest exec({int? laps, Duration? span}) {
-    this.laps = 0;
     stopwatch.reset();
 
     if (laps != null) {
-      for (; this.laps < laps; this.laps++) {
-        testProc(this, this.laps);
+      this.laps = laps;
+
+      for (var i = 0; i < laps; i++) {
+        if (!isMyStopwatch) {
+          stopwatch.start();
+        }
+        testProc(this, i);
+        if (!isMyStopwatch) {
+          stopwatch.stop();
+        }
       }
     } else if (span != null) {
+      this.laps = 0;
       final maxMicroseconds = span.inMicroseconds;
 
       for (; stopwatch.elapsedMicroseconds < maxMicroseconds; this.laps++) {
+        if (!isMyStopwatch) {
+          stopwatch.start();
+        }
         testProc(this, this.laps);
+        if (!isMyStopwatch) {
+          stopwatch.stop();
+        }
       }
     }
 
@@ -91,6 +108,11 @@ class PerfTest {
 
     return this;
   }
+
+  /// The default show proc
+  ///
+  String getDefaultShowRecord() =>
+      '$name | ${numberFormat.format(laps)} | $span';
 }
 
 /// A helper static method to create Duration from a total number of microseconds
