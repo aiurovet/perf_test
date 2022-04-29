@@ -8,77 +8,111 @@ import 'package:intl/intl.dart';
 class PerfTestFormat {
   /// The character for the border
   ///
-  final String barChar;
+  String barChar = '|';
 
   /// The character for the border
   ///
-  final String borderChar;
+  String borderChar = '-';
 
   /// The character for the corners of the border
   ///
-  final String cornerChar;
+  String cornerChar = '+';
 
   /// The format for dates
   ///
-  late final DateFormat dateFormat;
+  DateFormat dateFormat = DateFormat.yMMMMd();
 
   /// The format for datetimes
   ///
-  late final DateFormat dateTimeFormat;
+  DateFormat dateTimeFormat = DateFormat();
 
   /// The field separator in case of FSV output
   ///
-  String fieldSeparator;
+  String fieldSeparator = '';
 
   /// The string indicating the result is the same instead of 100%
   ///
-  final String identical;
+  String identical = '==';
 
   /// The symbol for infinity
   ///
-  final String infinite;
+  String infinite = '??';
 
   /// The format for numbers
   ///
-  late final NumberFormat numberFormat;
+  NumberFormat numberFormat = NumberFormat();
 
   /// The format for numbers
   ///
-  late final NumberFormat percentFormat;
+  NumberFormat percentFormat = NumberFormat.percentPattern();
 
   /// The embracing quote character
   ///
-  final String quote;
+  String quote = '"';
 
-  /// The escaped version of [_quote]
+  /// The escaped version of [quote]
   ///
-  final String quoteEscaped;
+  String quoteEscaped = '"';
 
   /// The format for times
   ///
-  late final DateFormat timeFormat;
+  DateFormat timeFormat = DateFormat.Hm();
 
   /// The constructor
   ///
   PerfTestFormat(
-      {this.barChar = '|',
-      this.borderChar = '-',
-      this.cornerChar = '+',
-      this.fieldSeparator = '',
-      this.identical = '==',
-      this.infinite = '??',
-      this.quote = '"',
-      this.quoteEscaped = '""',
+      {String? barChar,
+      String? borderChar,
+      String? cornerChar,
+      String? fieldSeparator,
+      String? identical,
+      String? infinite,
+      String? quote,
+      String? quoteEscaped,
       DateFormat? dateFormat,
       DateFormat? dateTimeFormat,
       NumberFormat? numberFormat,
       NumberFormat? percentFormat,
       DateFormat? timeFormat}) {
-    this.dateFormat = dateFormat ?? DateFormat.yMMMMd();
-    this.dateTimeFormat = dateFormat ?? DateFormat();
-    this.numberFormat = numberFormat ?? NumberFormat();
-    this.percentFormat = percentFormat ?? NumberFormat.percentPattern();
-    this.timeFormat = dateFormat ?? DateFormat.Hm();
+    if (barChar != null) {
+      this.barChar = barChar;
+    }
+    if (borderChar != null) {
+      this.borderChar = borderChar;
+    }
+    if (cornerChar != null) {
+      this.cornerChar = cornerChar;
+    }
+    if (dateFormat != null) {
+      this.dateFormat = dateFormat;
+    }
+    if (dateTimeFormat != null) {
+      this.dateTimeFormat = dateTimeFormat;
+    }
+    if (fieldSeparator != null) {
+      this.fieldSeparator = fieldSeparator;
+    }
+    if (identical != null) {
+      this.identical = identical;
+    }
+    if (infinite != null) {
+      this.identical = infinite;
+    }
+    if (numberFormat != null) {
+      this.numberFormat = numberFormat;
+    }
+    if (percentFormat != null) {
+      this.percentFormat = percentFormat;
+    }
+    if (quote != null) {
+      this.quote = quote;
+    }
+    if (quoteEscaped != null) {
+      this.quoteEscaped = quoteEscaped;
+    }
+    if (timeFormat != null) {
+      this.timeFormat = timeFormat;
+    }
   }
 
   /// The date value formatter
