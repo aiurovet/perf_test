@@ -3,74 +3,66 @@
 
 import 'package:perf_test/perf_test.dart';
 
-/// A type for the user-defined procedure to show result
+/// A class to store all performance test results for a lot (group)
 ///
-typedef PerfTestShowProc = void Function(PerfTestGroupShow show, PerfTest test);
-
-/// A type for the user-defined procedure to show group result
-///
-typedef PerfTestGroupShowProc = void Function(PerfTestGroup group);
-
-/// A class to store all performance test results for a group
-///
-class PerfTestGroupResult {
+class PerfTestLotResult {
   /// The list of all actual laps
   ///
-  late final lapsResults = <PerfTestResult>[];
+  late final lapsRatios = <PerfTestOneRatio>[];
 
   /// The list of all spans
   ///
-  late final spanResults = <PerfTestResult>[];
+  late final spanRatios = <PerfTestOneRatio>[];
 
-  /// The test group object
+  /// The output format
   ///
-  late final PerfTestFormat format;
+  late final PerfTestFmt format;
 
-  /// The test group object
+  /// The test lot object
   ///
-  final PerfTestGroup group;
+  final PerfTestLot lot;
 
   /// The maximum width of actual laps display ratio
   ///
   late final int maxLapsWidth;
 
-  /// The maximum width of span display ratio
-  ///
-  late final int maxSpanWidth;
-
   /// The maximum width of name pairs of test1 and test2
   ///
   late final int maxNameWidth;
 
+  /// The maximum width of span display ratio
+  ///
+  late final int maxSpanWidth;
+
   /// The constructor
   ///
-  PerfTestGroupResult(this.group, {PerfTestFormat? format}) {
-    this.format = format ?? PerfTestFormat();
+  PerfTestLotResult(this.lot, {PerfTestFmt? format}) {
+    this.format = format ?? PerfTestFmt();
   }
 
   /// Re-calculate everything
   ///
-  void exec() => _createMaxWidths(_createResults());
+  void exec() => _createMaxWidths(_createRatios());
 
   /// Get the default title string
   ///
   String getCaption() {
     final now = DateTime.now();
-    return '${group.name} - ${format.date(now)} - ${format.time(now)}';
+    return '${lot.name} - ${format.date(now)} - ${format.time(now)}';
   }
 
   /// Calculate maximum widths for all columns
   ///
-  void _createMaxWidths(List<String> resultNames) {
+  void _createMaxWidths(List<String> ratioNames) {
     // Get the maximum width of the actual laps
     //
-    var intValues = group.tests.map((x) => x.laps).toList();
+    var intValues = lot.tests.map((x) => x.laps).toList();
     var maxValueLen =
         intValues.isEmpty ? 0 : format.number((intValues..sort()).last).length;
 
     // Get the maximum width of the actual laps display ratio
     //
-    var widths = lapsResults.map((x) => x.displayRatio.length).toList();
+    var widths = lapsRatios.map((x) => x.outRatio.length).toList();
     var maxWidth = (widths.isEmpty ? 0 : (widths..sort()).last);
 
     // Set the maximum actual laps length
@@ -83,7 +75,7 @@ class PerfTestGroupResult {
 
     // Get the maximum width of span ratio
     //
-    widths = spanResults.map((x) => x.displayRatio.length).toList();
+    widths = spanRatios.map((x) => x.outRatio.length).toList();
     maxWidth = (widths.isEmpty ? 0 : (widths..sort()).last);
 
     // Set the maximum span width
@@ -92,12 +84,12 @@ class PerfTestGroupResult {
 
     // Get the maximum name width
     //
-    widths = group.tests.map((x) => x.name.length).toList();
+    widths = lot.tests.map((x) => x.name.length).toList();
     maxValueLen = widths.isEmpty ? 0 : (widths..sort()).last;
 
     // Get the maximum pair name width
     //
-    widths = resultNames.map((x) => x.length).toList();
+    widths = ratioNames.map((x) => x.length).toList();
     maxWidth = widths.isEmpty ? 0 : (widths..sort()).last;
 
     // Set the maximum name width
@@ -105,14 +97,14 @@ class PerfTestGroupResult {
     maxNameWidth = (maxWidth > maxValueLen ? maxWidth : maxValueLen);
   }
 
-  /// Create perf test results for laps and spans
+  /// Create perf test ratios for laps and spans
   ///
-  List<String> _createResults() {
-    final tests = group.tests;
+  List<String> _createRatios() {
+    final tests = lot.tests;
     final testCount = tests.length;
-    final resultNames = <String>[];
+    final ratioNames = <String>[];
 
-    // Collect all results
+    // Collect all single test ratios
     //
     for (var i1 = 0; i1 < testCount; i1++) {
       final test1 = tests[i1];
@@ -124,19 +116,19 @@ class PerfTestGroupResult {
           if (test1.isMagnetic || test2.isMagnetic) {
             final ar1 = test1.laps;
             final ar2 = test2.laps;
-            var ptr = PerfTestResult(test1, ar1, test2, ar2, format: format);
-            lapsResults.add(ptr);
-            resultNames.add(ptr.name);
+            var ptr = PerfTestOneRatio(test1, ar1, test2, ar2, format: format);
+            lapsRatios.add(ptr);
+            ratioNames.add(ptr.name);
 
             final em1 = test1.span.inMicroseconds;
             final em2 = test2.span.inMicroseconds;
-            ptr = PerfTestResult(test1, em1, test2, em2, format: format);
-            spanResults.add(ptr);
+            ptr = PerfTestOneRatio(test1, em1, test2, em2, format: format);
+            spanRatios.add(ptr);
           }
         }
       }
     }
 
-    return resultNames;
+    return ratioNames;
   }
 }

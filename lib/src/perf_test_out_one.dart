@@ -3,28 +3,7 @@
 
 import 'package:perf_test/perf_test.dart';
 
-class PerfTestShow {
-  /// The border line
-  ///
-  String get line => _line;
-  String _line = '';
-
-  /// Formatted string for the laps
-  ///
-  String displayLaps = '';
-
-  /// Formatted string for the name
-  ///
-  String displayName = '';
-
-  /// Formatted string for the span
-  ///
-  String displaySpan = '';
-
-  /// The field formatter
-  ///
-  late final PerfTestFormat format;
-
+class PerfTestOutOne {
   /// Full width of the data table
   ///
   static int get fullWidth => _fullWidth;
@@ -34,14 +13,35 @@ class PerfTestShow {
   ///
   bool isBorder = false;
 
-  /// The group result parent object
+  /// Formatted string for the laps
   ///
-  final PerfTestGroupShow show;
+  String outLaps = '';
+
+  /// The any line of the output (border or data)
+  ///
+  String get outLine => _outLine;
+  String _outLine = '';
+
+  /// Formatted string for the name
+  ///
+  String outName = '';
+
+  /// Formatted string for the span
+  ///
+  String outSpan = '';
+
+  /// The convenience field formatter (derived from the lot)
+  ///
+  late final PerfTestFmt format;
+
+  /// The parent
+  ///
+  final PerfTestOutLot outLot;
 
   /// The constructor
   ///
-  PerfTestShow(this.show) {
-    format = show.result.format;
+  PerfTestOutOne(this.outLot) {
+    format = outLot.format;
   }
 
   /// Ensure every string is embraced in quotes if needed, all internal quotes are escaped,
@@ -67,7 +67,7 @@ class PerfTestShow {
   /// The actual printing
   ///
   void exec({int index = -1, bool isTest = false}) {
-    final r = show.result;
+    final r = outLot.result;
 
     isBorder = (index < 0);
 
@@ -80,18 +80,18 @@ class PerfTestShow {
       _initLineData(r, format, index, isTest);
     }
 
-    show.printer(_line);
+    outLot.printer(_outLine);
   }
 
   /// The serializer
   ///
   @override
-  String toString() => _line;
+  String toString() => _outLine;
 
   /// Initialize line border
   ///
-  void _initLineBorder(PerfTestGroupResult r, PerfTestFormat f) {
-    _line = f.cornerChar +
+  void _initLineBorder(PerfTestLotResult r, PerfTestFmt f) {
+    _outLine = f.cornerChar +
         f.borderChar * (1 + r.maxNameWidth + 1) +
         f.cornerChar +
         f.borderChar * (1 + r.maxLapsWidth + 1) +
@@ -103,48 +103,48 @@ class PerfTestShow {
   /// Initialize line data
   ///
   void _initLineData(
-      PerfTestGroupResult r, PerfTestFormat f, int index, bool isTest) {
+      PerfTestLotResult r, PerfTestFmt f, int index, bool isTest) {
     _initLineDataParts(r, f, index, isTest);
 
     var sep = f.fieldSeparator;
     var hasSep = sep.isNotEmpty;
 
     var maxWidth = (hasSep ? 0 : r.maxNameWidth);
-    displayName = adjustQuotes(f.string(displayName, maxWidth));
+    outName = adjustQuotes(f.string(outName, maxWidth));
 
     maxWidth = (hasSep ? 0 : r.maxLapsWidth);
-    displayLaps = adjustQuotes(f.string(displayLaps, maxWidth, true));
+    outLaps = adjustQuotes(f.string(outLaps, maxWidth, true));
 
     maxWidth = (hasSep ? 0 : r.maxSpanWidth);
-    displaySpan = adjustQuotes(f.string(displaySpan, maxWidth, true));
+    outSpan = adjustQuotes(f.string(outSpan, maxWidth, true));
 
     if (hasSep) {
-      _line = displayName + sep + displayLaps + sep + displaySpan;
+      _outLine = outName + sep + outLaps + sep + outSpan;
     } else {
       final b = f.barChar;
-      _line = '$b $displayName $b $displayLaps $b $displaySpan $b';
+      _outLine = '$b $outName $b $outLaps $b $outSpan $b';
     }
   }
 
   /// Initialize line data parts
   ///
   void _initLineDataParts(
-      PerfTestGroupResult r, PerfTestFormat f, int index, bool isTest) {
+      PerfTestLotResult r, PerfTestFmt f, int index, bool isTest) {
     if (index >= 0) {
       if (isTest) {
-        final t = r.group.tests[index];
-        displayName = t.name;
-        displayLaps = f.number(t.laps);
-        displaySpan = t.span.toString();
+        final t = r.lot.tests[index];
+        outName = t.name;
+        outLaps = f.number(t.laps);
+        outSpan = t.span.toString();
       } else {
-        displayName = r.lapsResults[index].name;
-        displayLaps = r.lapsResults[index].displayRatio;
-        displaySpan = r.spanResults[index].displayRatio;
+        outName = r.lapsRatios[index].name;
+        outLaps = r.lapsRatios[index].outRatio;
+        outSpan = r.spanRatios[index].outRatio;
       }
     } else {
-      displayName = '';
-      displayLaps = '';
-      displaySpan = '';
+      outName = '';
+      outLaps = '';
+      outSpan = '';
     }
   }
 }

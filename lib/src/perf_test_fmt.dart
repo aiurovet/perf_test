@@ -3,9 +3,9 @@
 
 import 'package:intl/intl.dart';
 
-/// A class to store all performance test results for a group
+/// The output style for all tests
 ///
-class PerfTestFormat {
+class PerfTestFmt {
   /// The character for the border
   ///
   String barChar = '|';
@@ -30,13 +30,9 @@ class PerfTestFormat {
   ///
   String fieldSeparator = '';
 
-  /// The string indicating the result is the same instead of 100%
-  ///
-  String identical = '==';
-
   /// The symbol for infinity
   ///
-  String infinite = '??';
+  String infinite = 'NaN';
 
   /// The format for numbers
   ///
@@ -46,13 +42,13 @@ class PerfTestFormat {
   ///
   NumberFormat percentFormat = NumberFormat.percentPattern();
 
-  /// The embracing quote character
+  /// The embracing quote character if [fieldSeparator] is not empty
   ///
   String quote = '"';
 
   /// The escaped version of [quote]
   ///
-  String quoteEscaped = '"';
+  String quoteEscaped = '""';
 
   /// The format for times
   ///
@@ -60,13 +56,14 @@ class PerfTestFormat {
 
   /// The constructor
   ///
-  PerfTestFormat(
+  PerfTestFmt(
       {String? barChar,
       String? borderChar,
       String? cornerChar,
       String? fieldSeparator,
-      String? identical,
       String? infinite,
+      // true = display percentage as a number (only if percentFormat is null)
+      bool isPercentNumeric = false,
       String? quote,
       String? quoteEscaped,
       DateFormat? dateFormat,
@@ -92,17 +89,16 @@ class PerfTestFormat {
     if (fieldSeparator != null) {
       this.fieldSeparator = fieldSeparator;
     }
-    if (identical != null) {
-      this.identical = identical;
-    }
     if (infinite != null) {
-      this.identical = infinite;
+      this.infinite = infinite;
     }
     if (numberFormat != null) {
       this.numberFormat = numberFormat;
     }
     if (percentFormat != null) {
       this.percentFormat = percentFormat;
+    } else if (isPercentNumeric) {
+      this.percentFormat = NumberFormat('#,##0.00');
     }
     if (quote != null) {
       this.quote = quote;

@@ -20,12 +20,12 @@ int? laps;
 /// The actual execution
 ///
 void exec({String? fieldSeparator, PerfTestPrinter? printer}) {
-  PerfTestGroup('\nComparing loops', isMyStopwatch: false,
-      fieldSeparator: fieldSeparator, printer: printer)
-    ..add(PerfTest('For', testProc: testProc1, isMagnetic: true))
-    ..add(PerfTest('ForEx', testProc: testProc2, isMagnetic: true))
-    ..add(PerfTest('ForRev', testProc: testProc3))
-    ..add(PerfTest('ForEach', testProc: testProc4))
+  PerfTestLot('\nComparing loops',
+      isMyStopwatch: false, fieldSeparator: fieldSeparator, printer: printer)
+    ..add(PerfTestOne('For', testProc: testProc1, isMagnetic: true))
+    ..add(PerfTestOne('ForEx', testProc: testProc2, isMagnetic: true))
+    ..add(PerfTestOne('ForRev', testProc: testProc3))
+    ..add(PerfTestOne('ForEach', testProc: testProc4))
     ..exec(laps: laps, span: span);
 }
 
@@ -71,7 +71,7 @@ List<int> setUp() {
 
 /// The performance test #1
 ///
-void testProc1(PerfTest test, int lapNo) {
+void testProc1(PerfTestOne test, int lapNo) {
   // The if condition and even the whole block are unnecessary,
   // as you should know what you do. Just showing the capabilities
   //
@@ -91,7 +91,7 @@ void testProc1(PerfTest test, int lapNo) {
 
 /// The performance test #2
 ///
-void testProc2(PerfTest test, int lapNo) {
+void testProc2(PerfTestOne test, int lapNo) {
   if (test.isMyStopwatch) {
     test.stopwatch.start();
   }
@@ -109,7 +109,7 @@ void testProc2(PerfTest test, int lapNo) {
 
 /// The performance test #3
 ///
-void testProc3(PerfTest test, int lapNo) {
+void testProc3(PerfTestOne test, int lapNo) {
   if (test.isMyStopwatch) {
     test.stopwatch.start();
   }
@@ -126,7 +126,7 @@ void testProc3(PerfTest test, int lapNo) {
 
 /// The performance test #4
 ///
-void testProc4(PerfTest test, int lapNo) {
+void testProc4(PerfTestOne test, int lapNo) {
   if (test.isMyStopwatch) {
     test.stopwatch.start();
   }

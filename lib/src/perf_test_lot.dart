@@ -5,7 +5,7 @@ import 'package:perf_test/perf_test.dart';
 
 /// A class to group multiple tests and calculate mutual rates
 ///
-class PerfTestGroup {
+class PerfTestLot {
   /// A flag indicating that the stopwatch is started and
   /// stopped by the user rather than by this class object
   ///
@@ -15,50 +15,50 @@ class PerfTestGroup {
   ///
   final bool isQuiet;
 
-  /// The name of the group
+  /// The name of the lot
   ///
   final String name;
 
   /// The reference to the result object
   ///
-  late final PerfTestGroupResult result;
+  late final PerfTestLotResult result;
 
-  /// The actual user-defined procedure to display group result
+  /// The actual user-defined procedure to display the result
   ///
-  late final PerfTestGroupShow show;
+  late final PerfTestOutLot outLot;
 
-  /// The group-wide stopwatch used to measure performance
+  /// The lot-wide stopwatch used to measure performance
   ///
   late final Stopwatch? stopwatch;
 
   /// The actual number of the test iterations upon execution completion
   ///
-  final tests = <PerfTest>[];
+  final tests = <PerfTestOne>[];
 
   /// The constructor
   ///
-  PerfTestGroup(this.name,
+  PerfTestLot(this.name,
       {Stopwatch? stopwatch,
       PerfTestPrinter? printer,
-      PerfTestGroupResult? result,
-      PerfTestGroupShow? show,
+      PerfTestLotResult? result,
+      PerfTestOutLot? outLot,
       String? fieldSeparator,
       this.isMyStopwatch = false,
       this.isQuiet = false}) {
-    this.result = result ?? PerfTestGroupResult(this);
+    this.result = result ?? PerfTestLotResult(this);
 
     if (fieldSeparator != null) {
       this.result.format.fieldSeparator = fieldSeparator;
     }
 
-    this.show = show ?? PerfTestGroupShow(this.result, printer: printer);
+    this.outLot = outLot ?? PerfTestOutLot(this.result, printer: printer);
     this.stopwatch = stopwatch ?? Stopwatch();
   }
 
-  /// The default show proc
+  /// The PerfTestOne adder
   ///
-  void add(PerfTest test, {bool isDefault = false}) {
-    test.group = this;
+  void add(PerfTestOne test, {bool isDefault = false}) {
+    test.lot = this;
     test.isMyStopwatch = isMyStopwatch;
 
     if (stopwatch != null) {
@@ -100,7 +100,7 @@ class PerfTestGroup {
     }
 
     if (!isQuiet) {
-      show.exec();
+      outLot.exec();
     }
   }
 }
