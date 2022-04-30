@@ -9,12 +9,7 @@ typedef PerfTestOneProc = void Function(PerfTestOne test, int lapNo);
 
 /// A type for the user-defined procedure to show lot result
 ///
-typedef PerfTestOutLotProc = void Function(PerfTestLot lot);
-
-/// A type for the user-defined procedure to show result
-///
-typedef PerfTestOutOneProc = void Function(
-    PerfTestOutLot outLot, PerfTestOne test);
+typedef PerfTestOutProc = void Function(PerfTestLot lot);
 
 /// A type for the printing routine
 ///

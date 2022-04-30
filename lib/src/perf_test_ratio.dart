@@ -6,14 +6,14 @@ import 'package:perf_test/perf_test.dart';
 /// A class to store and display ratio of a performance
 /// test result (actual laps, time spent) against another one
 ///
-class PerfTestOneRatio {
+class PerfTestRatio {
   /// The pattern for the ratio conversion to display string
   ///
   late final PerfTestFmt format;
 
-  /// The default name
+  /// The primary test object
   ///
-  String get name => '${test1.name} / ${test2.name}';
+  final PerfTestMode mode;
 
   /// The string showing the ratio
   ///
@@ -22,14 +22,6 @@ class PerfTestOneRatio {
   /// The ratio
   ///
   late final num ratio;
-
-  /// The primary test value (laps or span in microseconds)
-  ///
-  final num value1;
-
-  /// The secondary test value (laps or span in microseconds)
-  ///
-  final num value2;
 
   /// The primary test object
   ///
@@ -41,18 +33,23 @@ class PerfTestOneRatio {
 
   /// The constructor
   ///
-  PerfTestOneRatio(this.test1, this.value1, this.test2, this.value2,
-      {PerfTestFmt? format}) {
+  PerfTestRatio(this.test1, this.test2, {this.mode = PerfTestMode.byLaps, PerfTestFmt? format}) {
     this.format = format ?? PerfTestFmt();
+
+    final isByLaps = mode == PerfTestMode.byLaps;
+    final isPretty = this.format.fieldSeparator.isEmpty;
+
+    final value1 = isByLaps ? test1.span.inMicroseconds : test1.laps;
+    final value2 = isByLaps ? test2.span.inMicroseconds : test2.laps;
 
     if (value1 == value2) {
       ratio = 1;      
-      outRatio = this.format.percent(ratio);
-    } else if (value2 == 0) {
+      outRatio = (isPretty ? '' : this.format.percent(ratio));
+    } else if (value1 == 0) {
       ratio = -1;
       outRatio = this.format.infinite;
     } else {
-      ratio = value1 / value2;
+      ratio = value2 / value1;
       outRatio = this.format.percent(ratio);
     }
   }

@@ -19,11 +19,11 @@ int? laps;
 
 /// The actual execution
 ///
-void exec({String? fieldSeparator, PerfTestPrinter? printer}) {
+void exec({PerfTestFmt? format, PerfTestPrinter? printer}) {
   PerfTestLot('\nComparing loops',
-      isMyStopwatch: false, fieldSeparator: fieldSeparator, printer: printer)
-    ..add(PerfTestOne('For', testProc: testProc1, isMagnetic: true))
-    ..add(PerfTestOne('ForEx', testProc: testProc2, isMagnetic: true))
+      isMyStopwatch: false, format: format, printer: printer)
+    ..add(PerfTestOne('For', testProc: testProc1))
+    ..add(PerfTestOne('ForEx', testProc: testProc2))
     ..add(PerfTestOne('ForRev', testProc: testProc3))
     ..add(PerfTestOne('ForEach', testProc: testProc4))
     ..exec(laps: laps, span: span);
@@ -35,7 +35,7 @@ void main(List<String> args) {
   parseArgs(args);
   setUp();
   exec(printer: printErr);
-  exec(fieldSeparator: ',');
+  exec(format: PerfTestFmt(fieldSeparator: ',', isPercentNumeric: true));
 }
 
 /// Parse command-line arguments

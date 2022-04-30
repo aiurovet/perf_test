@@ -12,11 +12,15 @@ class PerfTestOne {
   ///
   PerfTestLot? lot;
 
-  /// Can engage any element in performance comparison
+  /// The convenience property derived from [lot]
   ///
-  bool isMagnetic;
+  PerfTestFmt format = PerfTestFmt();
 
-  /// A flag indicating that the stopwatch is started and
+  /// The flag indicating the test is run for the fixed number of laps
+  ///
+  PerfTestMode mode;
+
+  /// The flag indicating that the stopwatch is started and
   /// stopped by a user rather than by this class object
   ///
   bool isMyStopwatch;
@@ -33,6 +37,10 @@ class PerfTestOne {
   ///
   final String name;
 
+  /// The output value of the test (laps or span)
+  ///
+  String outValue;
+
   /// The stopwatch used to measure performance
   ///
   Stopwatch stopwatch = Stopwatch();
@@ -45,10 +53,16 @@ class PerfTestOne {
   ///
   PerfTestOne(this.name,
       {this.lot,
+      PerfTestFmt? format,
       Stopwatch? stopwatch,
-      this.isMagnetic = false,
       this.isMyStopwatch = false,
+      this.mode = PerfTestMode.byLaps,
+      this.outValue = '',
       this.testProc = emptyTestProc}) {
+    if (format != null) {
+      this.format = format;
+    }
+
     if (stopwatch != null) {
       this.stopwatch = stopwatch;
     }
@@ -91,8 +105,35 @@ class PerfTestOne {
     }
 
     this.span = durationFromMicroseconds(stopwatch.elapsedMicroseconds);
+    outValue = valueToString();
 
     return this;
+  }
+
+  /// The parent initializer
+  ///
+  PerfTestOne initLot(PerfTestLot newLot) {
+    lot = newLot;
+
+    format = newLot.format;
+    isMyStopwatch = newLot.isMyStopwatch;
+    mode = newLot.mode;
+
+    if (newLot.stopwatch != null) {
+      stopwatch = newLot.stopwatch!;
+    }
+
+    return this;
+  }
+
+  /// The serializer of the mode-specific value
+  ///
+  String valueToString() {
+    if (mode == PerfTestMode.byLaps) {
+      return span.toString();
+    }
+
+    return format.number(laps);
   }
 }
 
