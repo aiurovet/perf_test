@@ -2,17 +2,30 @@
 // All rights reserved under MIT license (see LICENSE file)
 
 import 'package:intl/intl.dart';
+import 'package:perf_test/perf_test.dart';
 
 /// The output style for all tests
 ///
 class PerfTestFmt {
-  /// The character for the border
+  /// Placeholder for the current date in the caption
   ///
-  String barChar = '|';
+  static const String stubDate = '{D}';
 
-  /// The character for the border
+  /// Placeholder for the limit (maxLaps or maxSpan) in the caption
   ///
-  String borderChar = '-';
+  static const String stubSize = '{M}';
+
+  /// Placeholder for the current time in the caption
+  ///
+  static const String stubTime = '{T}';
+
+  /// The character for the horizontal bar
+  ///
+  String horBarChar = '-';
+
+  /// The character for the vertical bar
+  ///
+  String verBarChar = '|';
 
   /// The character for the corners of the border
   ///
@@ -30,9 +43,13 @@ class PerfTestFmt {
   ///
   String fieldSeparator = '';
 
-  /// The symbol for infinity
+  /// The number for infinity
   ///
-  String infinite = 'NaN';
+  num infinity = 9999.99;
+
+  /// The number for infinity
+  ///
+  bool get isPretty => fieldSeparator.isEmpty;
 
   /// The format for numbers
   ///
@@ -42,6 +59,10 @@ class PerfTestFmt {
   ///
   NumberFormat percentFormat = NumberFormat.percentPattern();
 
+  /// The actual function to send to the output
+  ///
+  late final PerfTestPrinter printer;
+
   /// The embracing quote character if [fieldSeparator] is not empty
   ///
   String quote = '"';
@@ -50,6 +71,10 @@ class PerfTestFmt {
   ///
   String quoteEscaped = '""';
 
+  /// Bitwise combination of style* constants
+  ///
+  PerfTestStyle style = PerfTestStyle();
+
   /// The format for times
   ///
   DateFormat timeFormat = DateFormat.Hm();
@@ -57,25 +82,32 @@ class PerfTestFmt {
   /// The constructor
   ///
   PerfTestFmt(
-      {String? barChar,
-      String? borderChar,
+      {String? horBarChar,
+      String? verBarChar,
       String? cornerChar,
       String? fieldSeparator,
-      String? infinite,
+      num? infinity,
       // true = display percentage as a number (only if percentFormat is null)
-      bool isPercentNumeric = false,
+      PerfTestPrinter? printer,
       String? quote,
       String? quoteEscaped,
+      PerfTestStyle? style,
       DateFormat? dateFormat,
       DateFormat? dateTimeFormat,
       NumberFormat? numberFormat,
       NumberFormat? percentFormat,
       DateFormat? timeFormat}) {
-    if (barChar != null) {
-      this.barChar = barChar;
+    this.printer = printer ?? print;
+
+    if (style != null) {
+      this.style = style;
     }
-    if (borderChar != null) {
-      this.borderChar = borderChar;
+
+    if (verBarChar != null) {
+      this.verBarChar = verBarChar;
+    }
+    if (horBarChar != null) {
+      this.horBarChar = horBarChar;
     }
     if (cornerChar != null) {
       this.cornerChar = cornerChar;
@@ -89,15 +121,17 @@ class PerfTestFmt {
     if (fieldSeparator != null) {
       this.fieldSeparator = fieldSeparator;
     }
-    if (infinite != null) {
-      this.infinite = infinite;
+    if (infinity != null) {
+      this.infinity = infinity;
     }
     if (numberFormat != null) {
       this.numberFormat = numberFormat;
     }
     if (percentFormat != null) {
       this.percentFormat = percentFormat;
-    } else if (isPercentNumeric) {
+    } else if (this.style.isPercent) {
+      this.percentFormat = NumberFormat.percentPattern();
+    } else {
       this.percentFormat = NumberFormat('#,##0.00');
     }
     if (quote != null) {

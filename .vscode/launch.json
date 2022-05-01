@@ -4,10 +4,13 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-    { "name":    "0.5 sec", "args": ["-t",      "0.5"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
-    { "name":    "1.0 sec", "args": ["-t",        "1"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
-    { "name":      "1,000", "args": ["-c",     "1000"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
-    { "name":  "1,000,000", "args": ["-c",  "1000000"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
-    { "name": "10,000,000", "args": ["-c", "10000000"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
+    { "name": "Span: 0 mcs",      "args": ["-t",        "0"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
+    { "name": "Span: 1 mcs",      "args": ["-t", "0.000001"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
+    { "name": "Span: 0.5 sec",    "args": ["-t",      "0.5"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
+    { "name": "Span: 1.0 sec",    "args": ["-t",        "1"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
+    { "name": "Laps: 0",          "args": ["-c",        "0"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
+    { "name": "Laps: 1,000",      "args": ["-c",     "1000"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
+    { "name": "Laps: 1,000,000",  "args": ["-c",  "1000000"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
+    { "name": "Laps: 10,000,000", "args": ["-c", "10000000"], "request": "launch", "type": "dart", "program": "example/perf_test_example.dart" },
   ]
 }

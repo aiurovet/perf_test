@@ -19,14 +19,17 @@ int? laps;
 
 /// The actual execution
 ///
-void exec({PerfTestFmt? format, PerfTestPrinter? printer}) {
-  PerfTestLot('\nComparing loops',
-      isMyStopwatch: false, format: format, printer: printer)
+void exec({PerfTestFmt? format}) {
+  final lotName = format?.style.isPretty ?? false
+      ? '\nComparing loops - {M} - {D} at {T}'
+      : 'Comparing loops,,';
+
+  PerfTestLot(lotName, isMyStopwatch: false, format: format)
     ..add(PerfTestOne('For', testProc: testProc1))
     ..add(PerfTestOne('ForEx', testProc: testProc2))
     ..add(PerfTestOne('ForRev', testProc: testProc3))
     ..add(PerfTestOne('ForEach', testProc: testProc4))
-    ..exec(laps: laps, span: span);
+    ..exec(maxLaps: laps, maxSpan: span);
 }
 
 /// The entry point
@@ -34,8 +37,11 @@ void exec({PerfTestFmt? format, PerfTestPrinter? printer}) {
 void main(List<String> args) {
   parseArgs(args);
   setUp();
-  exec(printer: printErr);
-  exec(format: PerfTestFmt(fieldSeparator: ',', isPercentNumeric: true));
+
+  final style = PerfTestStyle(PerfTestStyle.prettyWithPercent);
+
+  exec(format: PerfTestFmt(style: style));
+  exec(format: PerfTestFmt(fieldSeparator: ',', printer: printErr));
 }
 
 /// Parse command-line arguments

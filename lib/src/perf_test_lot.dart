@@ -1,31 +1,33 @@
 // Copyright (c) 2022, Alexander Iurovetski
 // All rights reserved under MIT license (see LICENSE file)
 
+import 'dart:math';
+
 import 'package:perf_test/perf_test.dart';
 
 /// A class to group multiple tests and calculate mutual rates
 ///
 class PerfTestLot {
-  /// The output format
+  /// Output format
   ///
   late final PerfTestFmt format;
 
-  /// A flag indicating that the stopwatch is started and
+  /// Flag indicating that the stopwatch is started and
   /// stopped by the user rather than by this class object
   ///
   final bool isMyStopwatch;
 
-  /// A flag indicating that no output is expected
+  /// Flag indicating that no output is expected
   ///
   final bool isQuiet;
 
-  /// A flag indicating that no output is expected
+  /// Flag indicating that the output value is laps rather span
   ///
-  PerfTestMode mode;
+  bool isOutLaps = false;
 
-  /// The maximum data display width (laps or span)
+  /// The length of test as a number of repeats
   ///
-  var maxDataWidth = 0;
+  int? maxLaps;
 
   /// The maximum test name width
   ///
@@ -35,6 +37,14 @@ class PerfTestLot {
   ///
   var maxRatioWidth = 0;
 
+  /// The length of test as duration
+  ///
+  Duration? maxSpan;
+
+  /// Maximum value display width (laps or span)
+  ///
+  var maxValueWidth = 0;
+
   /// The name of the lot
   ///
   final String name;
@@ -42,10 +52,6 @@ class PerfTestLot {
   /// The actual user-defined procedure to display the result
   ///
   late final PerfTestOut out;
-
-  /// The list of all possible ratios
-  ///
-  final ratios = <PerfTestRatio>[];
 
   /// The lot-wide stopwatch used to measure performance
   ///
@@ -59,28 +65,25 @@ class PerfTestLot {
   ///
   PerfTestLot(this.name,
       {Stopwatch? stopwatch,
-      PerfTestPrinter? printer,
       PerfTestOut? out,
       PerfTestFmt? format,
       this.isMyStopwatch = false,
-      this.isQuiet = false,
-      this.mode = PerfTestMode.byLaps}) {
+      this.isQuiet = false}) {
     this.format = format ?? PerfTestFmt();
-    this.out = out ?? PerfTestOut(this, printer: printer);
+    this.out = out ?? PerfTestOut(this);
     this.stopwatch = stopwatch ?? Stopwatch();
   }
 
   /// The PerfTestOne adder
   ///
-  void add(PerfTestOne test) =>
-    tests.add(test.initLot(this));
+  void add(PerfTestOne test) => tests.add(test.initLot(this));
 
   /// and calculate maximum widths for all columns
   ///
-  void createRatios({int? laps, Duration? span}) {
+  void createRatios() {
     final testCount = tests.length;
     final isPretty = format.fieldSeparator.isEmpty;
-    
+
     // Collect all single test ratios and calculate max widths
     //
     final test1 = tests[0];
@@ -89,17 +92,16 @@ class PerfTestLot {
     for (var i = 0, width = 0; i < testCount; i++) {
       final test2 = tests[i];
 
-      var ratio = PerfTestRatio(test1, test2, mode: mode, format: format);
-      ratios.add(ratio);
+      test2.setRatio(test1);
 
       if (isPretty) {
         width = test2.name.length;
         maxNameWidth = (maxNameWidth >= width ? maxNameWidth : width);
 
         width = test2.outValue.length;
-        maxDataWidth = (maxDataWidth >= width ? maxDataWidth : width);
+        maxValueWidth = (maxValueWidth >= width ? maxValueWidth : width);
 
-        width = ratio.outRatio.length;
+        width = test2.outRatio.length;
         maxRatioWidth = (maxRatioWidth >= width ? maxRatioWidth : width);
       }
     }
@@ -107,22 +109,20 @@ class PerfTestLot {
 
   /// The runner
   ///
-  void exec({int? laps, Duration? span}) {
+  void exec({int? maxLaps, Duration? maxSpan}) {
+    this.maxLaps = maxLaps;
+    this.maxSpan = maxSpan;
+
+    isOutLaps = (maxLaps == null);
+
     for (var i = 0, n = tests.length; i < n; i++) {
-      tests[i].exec(laps: laps, span: span);
+      tests[i].exec(maxLaps: maxLaps, maxSpan: maxSpan);
     }
 
-    createRatios(laps: laps, span: span);
+    createRatios();
 
     if (!isQuiet) {
       out.exec();
     }
-  }
-
-  /// Get the default title string
-  ///
-  String getCaption() {
-    final now = DateTime.now();
-    return '$name - ${format.date(now)} - ${format.time(now)}';
   }
 }

@@ -14,27 +14,19 @@ class PerfTestOut {
   ///
   final PerfTestLot lot;
 
-  /// The actual function to send to the output
-  ///
-  late final PerfTestPrinter printer;
-
   /// The constructor
   ///
-  PerfTestOut(this.lot, {PerfTestPrinter? printer}) {
+  PerfTestOut(this.lot) {
     format = lot.format;
-    this.printer = printer ?? print;
   }
 
   /// The printing
   ///
   void exec() {
     final border = _getBorder();
-    final testCount = lot.tests.length;
-    final resultCount = lot.ratios.length;
-    final totalCount = (testCount + resultCount);
 
-    _execCaption(border: border, count: totalCount);
-    _execLines(border: border, count: testCount);
+    _execName(border);
+    _execData(border);
   }
 
   /// Ensure every string is embraced in quotes if needed, all internal quotes are escaped,
@@ -59,35 +51,33 @@ class PerfTestOut {
 
   /// The printing of a part
   ///
-  void _execCaption({String? border, int count = 0}) {
-    if (border == null) {
-      return;
+  void _execName(String? border) {
+    final name = _getName();
+
+    if (name != null) {
+      format.printer(name);
     }
 
-    final caption = lot.getCaption();
-
-    if (caption.isNotEmpty) {
-      printer(caption);
-    }
-
-    if (count > 0) {
-      printer(border);
+    if (lot.tests.isNotEmpty && (border != null)) {
+      format.printer(border);
     }
   }
 
   /// The printing of a single line of data
   ///
-  void _execLines({String? border, int count = 0}) {
+  void _execData(String? border) {
+    final count = lot.tests.length;
+
     if (count <= 0) {
       return;
     }
 
     for (var i = 0; i < count; i++) {
-      printer(_getData(i));
+      format.printer(_getData(i));
     }
 
     if (border != null) {
-      printer(border);
+      format.printer(border);
     }
   }
 
@@ -98,48 +88,75 @@ class PerfTestOut {
       return null;
     }
 
-    return
-      format.cornerChar +
-      format.borderChar * (1 + lot.maxNameWidth + 1) +
-      format.cornerChar +
-      format.borderChar * (1 + lot.maxRatioWidth + 1) +
-      format.cornerChar +
-      format.borderChar * (1 + lot.maxDataWidth + 1) +
-      format.cornerChar;
+    return format.cornerChar +
+        format.horBarChar * (1 + lot.maxNameWidth + 1) +
+        format.cornerChar +
+        format.horBarChar * (1 + lot.maxRatioWidth + 1) +
+        format.cornerChar +
+        format.horBarChar * (1 + lot.maxValueWidth + 1) +
+        format.cornerChar;
   }
 
   /// Initialize line data
   ///
   String _getData(int index) {
-    var outName = '';
-    var outData = '';
-    var outRatio = '';
+    final test = lot.tests[index];
 
-    if (index >= 0) {
-      final test = lot.tests[index];
-      outName = test.name;
-      outData = test.outValue;
-      outRatio = lot.ratios[index].outRatio;
-    }
+    var outName = test.name;
+    var outValue = test.outValue;
+    var outRatio = test.outRatio;
 
-    var sep = format.fieldSeparator;
-    var hasSep = sep.isNotEmpty;
+    var isPretty = format.isPretty;
 
-    var maxWidth = (hasSep ? 0 : lot.maxNameWidth);
+    var maxWidth = (isPretty ? lot.maxNameWidth : 0);
     outName = _adjustQuotes(format.string(outName, maxWidth));
 
-    maxWidth = (hasSep ? 0 : lot.maxDataWidth);
-    outData = _adjustQuotes(format.string(outData, maxWidth, true));
+    maxWidth = (isPretty ? lot.maxValueWidth : 0);
+    outValue = _adjustQuotes(format.string(outValue, maxWidth, true));
 
-    maxWidth = (hasSep ? 0 : lot.maxRatioWidth);
+    maxWidth = (isPretty ? lot.maxRatioWidth : 0);
     outRatio = _adjustQuotes(format.string(outRatio, maxWidth, true));
 
-    if (hasSep) {
-      return outName + sep + outRatio + sep + outData;
+    if (isPretty) {
+      if ((index == 0) || (outRatio == lot.tests[0].outRatio)) {
+        outRatio = ' ' * maxWidth;
+      }
     }
 
-    sep = format.barChar;
+    if (isPretty) {
+      final sep = format.verBarChar;
+      return '$sep $outName $sep $outRatio $sep $outValue $sep';
+    }
 
-    return '$sep $outName $sep $outRatio $sep $outData $sep';
+    final sep = format.fieldSeparator;
+    return outName + sep + outRatio + sep + outValue;
+  }
+
+  /// Expand and return name
+  ///
+  String? _getName() {
+    var name = lot.name;
+
+    if (name.isEmpty) {
+      return name;
+    }
+
+    final now = DateTime.now();
+    final date = format.date(now);
+    final time = format.time(now);
+    var size = '';
+
+    final maxLaps = lot.maxLaps;
+
+    if (maxLaps != null) {
+      size = (format.isPretty ? format.number(maxLaps) : maxLaps.toString());
+    } else if (lot.maxSpan != null) {
+      size = lot.maxSpan!.toString();
+    }
+
+    return name
+        .replaceAll(PerfTestFmt.stubDate, date)
+        .replaceAll(PerfTestFmt.stubSize, size)
+        .replaceAll(PerfTestFmt.stubTime, time);
   }
 }

@@ -8,61 +8,75 @@ import 'package:perf_test/perf_test.dart';
 /// span for a given number of iterations
 ///
 class PerfTestOne {
-  /// The parent
+  /// Parent
   ///
   PerfTestLot? lot;
 
-  /// The convenience property derived from [lot]
+  /// Convenience property derived from [lot]
   ///
   PerfTestFmt format = PerfTestFmt();
 
-  /// The flag indicating the test is run for the fixed number of laps
+  /// Flag indicating that the output data is laps rather than span
   ///
-  PerfTestMode mode;
+  bool isOutLaps;
 
-  /// The flag indicating that the stopwatch is started and
+  /// Flag indicating that the stopwatch is started and
   /// stopped by a user rather than by this class object
   ///
   bool isMyStopwatch;
 
-  /// The actual number of the test iterations upon execution completion
+  /// Actual number of the test iterations upon execution completion
   ///
-  int laps = 0;
+  int laps;
 
-  /// The pure total duration of testProc execution
-  ///
-  Duration span = Duration();
-
-  /// The name of the test
+  /// Name of the test
   ///
   final String name;
 
-  /// The output value of the test (laps or span)
+  /// Output value of [ratio]
+  ///
+  String outRatio;
+
+  /// Output value of [value]
   ///
   String outValue;
 
-  /// The stopwatch used to measure performance
+  /// Ratio versus the first test
+  ///
+  num ratio;
+
+  /// Total duration of [testProc] execution
+  ///
+  Duration span = Duration();
+
+  /// Stopwatch used to measure performance
   ///
   Stopwatch stopwatch = Stopwatch();
 
-  /// The actual user-defined procedure
+  /// Generic value based on expectation
+  ///
+  int get value => (isOutLaps ? laps : span.inMicroseconds);
+
+  /// Actual user-defined procedure
   ///
   final PerfTestOneProc testProc;
 
-  /// The constructor
+  /// Constructor
   ///
   PerfTestOne(this.name,
-      {this.lot,
-      PerfTestFmt? format,
-      Stopwatch? stopwatch,
+      {PerfTestFmt? format,
       this.isMyStopwatch = false,
-      this.mode = PerfTestMode.byLaps,
+      this.isOutLaps = false,
+      this.laps = 0,
+      this.lot,
+      this.outRatio = '',
       this.outValue = '',
+      this.ratio = 0,
+      Stopwatch? stopwatch,
       this.testProc = emptyTestProc}) {
     if (format != null) {
       this.format = format;
     }
-
     if (stopwatch != null) {
       this.stopwatch = stopwatch;
     }
@@ -74,13 +88,16 @@ class PerfTestOne {
 
   /// The test runner
   ///
-  PerfTestOne exec({int? laps, Duration? span}) {
+  PerfTestOne exec({int? maxLaps, Duration? maxSpan}) {
     stopwatch.reset();
 
-    if (laps != null) {
-      this.laps = laps;
+    isOutLaps = (maxLaps == null);
+    num spanAdjustment = 1.0;
 
-      for (var i = 0; i < laps; i++) {
+    if (maxLaps != null) {
+      laps = maxLaps;
+
+      for (var i = 0; i < maxLaps; i++) {
         if (!isMyStopwatch) {
           stopwatch.start();
         }
@@ -89,23 +106,33 @@ class PerfTestOne {
           stopwatch.stop();
         }
       }
-    } else if (span != null) {
-      this.laps = 0;
-      final maxMicroseconds = span.inMicroseconds;
+    } else if (maxSpan != null) {
+      laps = 0;
+      final maxMicroseconds = maxSpan.inMicroseconds;
 
-      for (; stopwatch.elapsedMicroseconds < maxMicroseconds; this.laps++) {
+      for (; stopwatch.elapsedMicroseconds < maxMicroseconds; laps++) {
         if (!isMyStopwatch) {
           stopwatch.start();
         }
-        testProc(this, this.laps);
+        testProc(this, laps);
         if (!isMyStopwatch) {
           stopwatch.stop();
         }
       }
+      if (maxMicroseconds == 0) {
+        spanAdjustment = 0;
+      } else {
+        spanAdjustment = stopwatch.elapsedMicroseconds / maxMicroseconds;
+      }
     }
 
-    this.span = durationFromMicroseconds(stopwatch.elapsedMicroseconds);
-    outValue = valueToString();
+    span = durationFromMicroseconds(stopwatch.elapsedMicroseconds);
+
+    if ((maxSpan != null) && (spanAdjustment != 1)) {
+      laps = (laps * spanAdjustment).round();
+    }
+
+    setOutValue();
 
     return this;
   }
@@ -117,7 +144,7 @@ class PerfTestOne {
 
     format = newLot.format;
     isMyStopwatch = newLot.isMyStopwatch;
-    mode = newLot.mode;
+    isOutLaps = newLot.isOutLaps;
 
     if (newLot.stopwatch != null) {
       stopwatch = newLot.stopwatch!;
@@ -126,14 +153,39 @@ class PerfTestOne {
     return this;
   }
 
-  /// The serializer of the mode-specific value
+  /// Calculate ratio against another test
   ///
-  String valueToString() {
-    if (mode == PerfTestMode.byLaps) {
-      return span.toString();
+  void setRatio(PerfTestOne versus) {
+    final value1 = value;
+    final value2 = versus.value;
+
+    if (value1 == value2) {
+      ratio = 1;
+    } else if (value1 == 0) {
+      ratio = format.infinity;
+    } else {
+      ratio = (value2 / value1);
     }
 
-    return format.number(laps);
+    if (format.style.isPretty) {
+      outRatio = format.percent(ratio);
+    } else {
+      outRatio = ratio.toStringAsFixed(2);
+    }
+  }
+
+  /// Serializer of the mode-specific value
+  ///
+  void setOutValue() {
+    if (isOutLaps) {
+      if (format.style.isPretty) {
+        outValue = format.number(laps);
+      } else {
+        outValue = laps.toString();
+      }
+    } else {
+      outValue = span.toString();
+    }
   }
 }
 
