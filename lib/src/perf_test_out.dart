@@ -8,7 +8,7 @@ import 'package:perf_test/perf_test.dart';
 class PerfTestOut {
   /// The formatter
   ///
-  late final PerfTestFmt format;
+  late final PerfTestFormat format;
 
   /// The convenience lot object
   ///
@@ -33,20 +33,17 @@ class PerfTestOut {
   /// and the field separator appended if the string does not represent the last field
   ///
   String _adjustQuotes(String fieldValue) {
-    var fieldValueEx = fieldValue;
-    var requiresQuotes = fieldValueEx.contains(format.quote);
+    final isRaw = format.dataStyle.isRaw;
+    final hasQuote = isRaw && fieldValue.contains(format.quote);
+    final hasSep = isRaw && fieldValue.contains(format.fieldSeparator);
 
-    if (!requiresQuotes && format.fieldSeparator.isNotEmpty) {
-      requiresQuotes = fieldValueEx.contains(format.fieldSeparator);
-    }
-
-    if (requiresQuotes) {
-      fieldValueEx = format.quote +
-          fieldValueEx.replaceAll(format.quote, format.quoteEscaped) +
+    if (hasQuote || hasSep) {
+      return format.quote +
+          fieldValue.replaceAll(format.quote, format.quoteEscaped) +
           format.quote;
     }
 
-    return fieldValueEx;
+    return fieldValue;
   }
 
   /// The printing of a part
@@ -106,30 +103,27 @@ class PerfTestOut {
     var outValue = test.outValue;
     var outRatio = test.outRatio;
 
-    var isPretty = format.isPretty;
+    if (format.dataStyle.isRaw) {
+      final sep = format.fieldSeparator;
 
-    var maxWidth = (isPretty ? lot.maxNameWidth : 0);
-    outName = _adjustQuotes(format.string(outName, maxWidth));
+      outName = _adjustQuotes(outName);
+      outRatio = _adjustQuotes(outRatio);
+      outValue = _adjustQuotes(outValue);
 
-    maxWidth = (isPretty ? lot.maxValueWidth : 0);
-    outValue = _adjustQuotes(format.string(outValue, maxWidth, true));
-
-    maxWidth = (isPretty ? lot.maxRatioWidth : 0);
-    outRatio = _adjustQuotes(format.string(outRatio, maxWidth, true));
-
-    if (isPretty) {
-      if ((index == 0) || (outRatio == lot.tests[0].outRatio)) {
-        outRatio = ' ' * maxWidth;
-      }
+      return outName + sep + outRatio + sep + outValue;
     }
 
-    if (isPretty) {
-      final sep = format.verBarChar;
-      return '$sep $outName $sep $outRatio $sep $outValue $sep';
+    if ((index == 0) || (outRatio == lot.tests[0].outRatio)) {
+      outRatio = '';
     }
 
-    final sep = format.fieldSeparator;
-    return outName + sep + outRatio + sep + outValue;
+    outName = format.string(outName, lot.maxNameWidth);
+    outValue = format.string(outValue, lot.maxValueWidth, true);
+    outRatio = format.string(outRatio, lot.maxRatioWidth, true);
+
+    final sep = format.verBarChar;
+
+    return '$sep $outName $sep $outRatio $sep $outValue $sep';
   }
 
   /// Expand and return name
@@ -149,14 +143,14 @@ class PerfTestOut {
     final maxLaps = lot.maxLaps;
 
     if (maxLaps != null) {
-      size = (format.isPretty ? format.number(maxLaps) : maxLaps.toString());
+      size = format.number(maxLaps);
     } else if (lot.maxSpan != null) {
-      size = lot.maxSpan!.toString();
+      size = format.duration(lot.maxSpan!);
     }
 
     return name
-        .replaceAll(PerfTestFmt.stubDate, date)
-        .replaceAll(PerfTestFmt.stubSize, size)
-        .replaceAll(PerfTestFmt.stubTime, time);
+        .replaceAll(PerfTestFormat.stubDate, date)
+        .replaceAll(PerfTestFormat.stubSize, size)
+        .replaceAll(PerfTestFormat.stubTime, time);
   }
 }

@@ -1,9 +1,9 @@
 // Copyright (c) 2022, Alexander Iurovetski
 // All rights reserved under MIT license (see LICENSE file)
 
-/// The output style for data (values and ratios)
+/// The output style for data (names, values and ratios)
 ///
-class PerfTestStyle {
+class PerfTestDataStyle {
   /// Style: print percentage as percentage rather than a number
   ///
   static const int percent = (1 << 0);
@@ -12,17 +12,17 @@ class PerfTestStyle {
   ///
   bool get isPercent => ((_flags & percent) != 0);
 
-  /// Style: print numeric data using formatters
+  /// Style: print data without using formatters
   ///
-  static const int pretty = (1 << 1);
+  static const int raw = (1 << 1);
 
-  /// Convenience flag for [pretty]
+  /// Convenience flag for [raw]
   ///
-  bool get isPretty => ((_flags & pretty) != 0);
+  bool get isRaw => ((_flags & raw) != 0);
 
-  /// Convenience style combining [pretty] and [percent]
+  /// Convenience style combining [raw] and [percent]
   ///
-  static const int prettyWithPercent = (pretty | percent);
+  static const int rawWithPercent = (raw | percent);
 
   /// Style: print values and ratios in separate blocks
   ///
@@ -47,5 +47,5 @@ class PerfTestStyle {
 
   /// The constructor
   ///
-  PerfTestStyle([this._flags = 0]);
+  PerfTestDataStyle([this._flags = 0]);
 }

@@ -14,7 +14,7 @@ class PerfTestOne {
 
   /// Convenience property derived from [lot]
   ///
-  PerfTestFmt format = PerfTestFmt();
+  PerfTestFormat format = PerfTestFormat();
 
   /// Flag indicating that the output data is laps rather than span
   ///
@@ -55,7 +55,7 @@ class PerfTestOne {
 
   /// Generic value based on expectation
   ///
-  int get value => (isOutLaps ? laps : span.inMicroseconds);
+  int get value => (isOutLaps ? laps : span.inMilliseconds);
 
   /// Actual user-defined procedure
   ///
@@ -64,7 +64,7 @@ class PerfTestOne {
   /// Constructor
   ///
   PerfTestOne(this.name,
-      {PerfTestFmt? format,
+      {PerfTestFormat? format,
       this.isMyStopwatch = false,
       this.isOutLaps = false,
       this.laps = 0,
@@ -108,9 +108,9 @@ class PerfTestOne {
       }
     } else if (maxSpan != null) {
       laps = 0;
-      final maxMicroseconds = maxSpan.inMicroseconds;
+      final maxMilliseconds = maxSpan.inMilliseconds;
 
-      for (; stopwatch.elapsedMicroseconds < maxMicroseconds; laps++) {
+      for (; stopwatch.elapsedMilliseconds < maxMilliseconds; laps++) {
         if (!isMyStopwatch) {
           stopwatch.start();
         }
@@ -119,14 +119,14 @@ class PerfTestOne {
           stopwatch.stop();
         }
       }
-      if (maxMicroseconds == 0) {
+      if (maxMilliseconds == 0) {
         spanAdjustment = 0;
       } else {
-        spanAdjustment = stopwatch.elapsedMicroseconds / maxMicroseconds;
+        spanAdjustment = stopwatch.elapsedMilliseconds / maxMilliseconds;
       }
     }
 
-    span = durationFromMicroseconds(stopwatch.elapsedMicroseconds);
+    span = durationFromMilliseconds(stopwatch.elapsedMilliseconds);
 
     if ((maxSpan != null) && (spanAdjustment != 1)) {
       laps = (laps * spanAdjustment).round();
@@ -164,7 +164,7 @@ class PerfTestOne {
     } else if (value1 == 0) {
       ratio = format.infinity;
     } else {
-      ratio = (value2 / value1);
+      ratio = (value1 / value2);
     }
 
     outRatio = format.percent(ratio);
@@ -176,10 +176,16 @@ class PerfTestOne {
     if (isOutLaps) {
       outValue = format.number(laps);
     } else {
-      outValue = span.toString();
+      outValue = format.duration(span);
     }
   }
 }
+
+/// A helper static method to create Duration from a total number of milliseconds
+///
+Duration durationFromMilliseconds(int totalMilliseconds) =>
+    durationFromMicroseconds(
+        totalMilliseconds * Duration.microsecondsPerMillisecond);
 
 /// A helper static method to create Duration from a total number of microseconds
 ///

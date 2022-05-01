@@ -4,9 +4,9 @@
 import 'package:intl/intl.dart';
 import 'package:perf_test/perf_test.dart';
 
-/// The output style for all tests
+/// The output format for all tests
 ///
-class PerfTestFmt {
+class PerfTestFormat {
   /// Placeholder for the current date in the caption
   ///
   static const String stubDate = '{D}';
@@ -47,10 +47,6 @@ class PerfTestFmt {
   ///
   num infinity = 9999.99;
 
-  /// The number for infinity
-  ///
-  bool get isPretty => fieldSeparator.isEmpty;
-
   /// The format for numbers
   ///
   NumberFormat numberFormat = NumberFormat();
@@ -73,7 +69,7 @@ class PerfTestFmt {
 
   /// Bitwise combination of style* constants
   ///
-  PerfTestStyle style = PerfTestStyle();
+  PerfTestDataStyle dataStyle = PerfTestDataStyle();
 
   /// The format for times
   ///
@@ -81,7 +77,7 @@ class PerfTestFmt {
 
   /// The constructor
   ///
-  PerfTestFmt(
+  PerfTestFormat(
       {String? horBarChar,
       String? verBarChar,
       String? cornerChar,
@@ -91,7 +87,7 @@ class PerfTestFmt {
       PerfTestPrinter? printer,
       String? quote,
       String? quoteEscaped,
-      PerfTestStyle? style,
+      PerfTestDataStyle? dataStyle,
       DateFormat? dateFormat,
       DateFormat? dateTimeFormat,
       NumberFormat? numberFormat,
@@ -99,8 +95,8 @@ class PerfTestFmt {
       DateFormat? timeFormat}) {
     this.printer = printer ?? print;
 
-    if (style != null) {
-      this.style = style;
+    if (dataStyle != null) {
+      this.dataStyle = dataStyle;
     }
 
     if (verBarChar != null) {
@@ -129,7 +125,7 @@ class PerfTestFmt {
     }
     if (percentFormat != null) {
       this.percentFormat = percentFormat;
-    } else if (this.style.isPercent) {
+    } else if (this.dataStyle.isPercent) {
       this.percentFormat = NumberFormat.percentPattern();
     } else {
       this.percentFormat = NumberFormat('#,##0.00');
@@ -157,22 +153,32 @@ class PerfTestFmt {
       maxWidth,
       true);
 
+  /// Duration value formatter
+  ///
+  String duration(Duration value, {int precision = 3}) {
+    final outValue = value.toString();
+    if (precision >= 6) {
+      return outValue;
+    }
+    return outValue.substring(0, outValue.length - 6 + precision);
+  }
+
   /// The numeric value formatter
   ///
   String number(num value, [int maxWidth = 0]) {
-    if (style.isPretty) {
-      return string(numberFormat.format(value), maxWidth, true);
+    if (dataStyle.isRaw) {
+      return value.toString();
     }
-    return value.toString();
+    return string(numberFormat.format(value), maxWidth, true);
   }
 
   /// The percentage value formatter
   ///
   String percent(num value, [int maxWidth = 0]) {
-    if (style.isPretty) {
-      return string(percentFormat.format(value), maxWidth, true);
+    if (dataStyle.isRaw) {
+      return value.toStringAsFixed(2);
     }
-    return value.toStringAsFixed(2);
+    return string(percentFormat.format(value), maxWidth, true);
   }
 
   /// The time value formatter
@@ -183,7 +189,7 @@ class PerfTestFmt {
   /// The string value formatter
   ///
   String string(String value, [int maxWidth = 0, bool padLeft = false]) {
-    if (!style.isPretty) {
+    if (dataStyle.isRaw) {
       return value;
     }
 

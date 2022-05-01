@@ -1,8 +1,6 @@
 // Copyright (c) 2022, Alexander Iurovetski
 // All rights reserved under MIT license (see LICENSE file)
 
-import 'dart:math';
-
 import 'package:perf_test/perf_test.dart';
 
 /// A class to group multiple tests and calculate mutual rates
@@ -10,7 +8,7 @@ import 'package:perf_test/perf_test.dart';
 class PerfTestLot {
   /// Output format
   ///
-  late final PerfTestFmt format;
+  late final PerfTestFormat format;
 
   /// Flag indicating that the stopwatch is started and
   /// stopped by the user rather than by this class object
@@ -66,10 +64,10 @@ class PerfTestLot {
   PerfTestLot(this.name,
       {Stopwatch? stopwatch,
       PerfTestOut? out,
-      PerfTestFmt? format,
+      PerfTestFormat? format,
       this.isMyStopwatch = false,
       this.isQuiet = false}) {
-    this.format = format ?? PerfTestFmt();
+    this.format = format ?? PerfTestFormat();
     this.out = out ?? PerfTestOut(this);
     this.stopwatch = stopwatch ?? Stopwatch();
   }
@@ -82,7 +80,7 @@ class PerfTestLot {
   ///
   void createRatios() {
     final testCount = tests.length;
-    final isPretty = format.style.isPretty;
+    final isRaw = format.dataStyle.isRaw;
 
     // Collect all single test ratios and calculate max widths
     //
@@ -94,7 +92,7 @@ class PerfTestLot {
 
       test2.setRatio(test1);
 
-      if (isPretty) {
+      if (!isRaw) {
         width = test2.name.length;
         maxNameWidth = (maxNameWidth >= width ? maxNameWidth : width);
 

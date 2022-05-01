@@ -17,18 +17,31 @@ Duration? span;
 ///
 int? laps;
 
-/// The actual execution
+/// The actual execution with the pretty output
 ///
-void exec({PerfTestFmt? format}) {
-  final lotName = format?.style.isPretty ?? false
-      ? '\nComparing loops - {M} - {D} at {T}'
-      : 'Comparing loops,{M},';
+void execPretty({PerfTestFormat? format}) {
+  final dataStyle = PerfTestDataStyle(PerfTestDataStyle.percent);
+  final format = PerfTestFormat(dataStyle: dataStyle);
 
-  PerfTestLot(lotName, isMyStopwatch: false, format: format)
-    ..add(PerfTestOne('For', testProc: testProc1))
+  PerfTestLot('\nComparing loops - {M} - {D} at {T}', format: format)
+    ..add(PerfTestOne('For, "as primary"', testProc: testProc1))
     ..add(PerfTestOne('ForEx', testProc: testProc2))
     ..add(PerfTestOne('ForRev', testProc: testProc3))
     ..add(PerfTestOne('ForEach', testProc: testProc4))
+    ..exec(maxLaps: laps, maxSpan: span);
+}
+
+/// The actual execution with the raw output
+///
+void execRaw({PerfTestFormat? format}) {
+  final dataStyle = PerfTestDataStyle(PerfTestDataStyle.raw);
+  final format = PerfTestFormat(fieldSeparator: ',', printer: printErr, dataStyle: dataStyle);
+
+  PerfTestLot('Comparing loops,{M},', isMyStopwatch: true, format: format)
+    ..add(PerfTestOne('For, "as primary"', testProc: testProc1w))
+    ..add(PerfTestOne('ForEx', testProc: testProc2w))
+    ..add(PerfTestOne('ForRev', testProc: testProc3w))
+    ..add(PerfTestOne('ForEach', testProc: testProc4w))
     ..exec(maxLaps: laps, maxSpan: span);
 }
 
@@ -37,17 +50,14 @@ void exec({PerfTestFmt? format}) {
 void main(List<String> args) {
   parseArgs(args);
   setUp();
-
-  final style = PerfTestStyle(PerfTestStyle.prettyWithPercent);
-
-  exec(format: PerfTestFmt(style: style));
-  exec(format: PerfTestFmt(fieldSeparator: ',', printer: printErr));
+  execPretty();
+  execRaw();
 }
 
 /// Parse command-line arguments
 ///
 void parseArgs(List<String> args) {
-  int? microseconds;
+  int? milliseconds;
 
   if (args.length == 2) {
     switch (args[0].toLowerCase()) {
@@ -55,9 +65,9 @@ void parseArgs(List<String> args) {
         laps = int.parse(args[1]);
         break;
       case '-t':
-        microseconds =
-            (num.parse(args[1]) * Duration.microsecondsPerSecond).floor();
-        span = durationFromMicroseconds(microseconds);
+        milliseconds =
+            (num.parse(args[1]) * Duration.millisecondsPerSecond).floor();
+        span = durationFromMilliseconds(milliseconds);
         break;
     }
   }
@@ -75,32 +85,42 @@ List<int> setUp() {
   return codeUnits;
 }
 
-/// The performance test #1
+/// Performance test #1
 ///
 void testProc1(PerfTestOne test, int lapNo) {
-  // The if condition and even the whole block are unnecessary,
-  // as you should know what you do. Just showing the capabilities
-  //
-  if (test.isMyStopwatch) {
-    test.stopwatch.start();
+  for (var i = 0, n = codeUnits.length; i < n; i++) {
+    codeUnits[i].isEven;
+    codeUnits[i].isOdd;
   }
+}
+
+/// Performance test #1 with the user-controlled stopwatch
+///
+void testProc1w(PerfTestOne test, int lapNo) {
+  test.stopwatch.start();
 
   for (var i = 0, n = codeUnits.length; i < n; i++) {
     codeUnits[i].isEven;
     codeUnits[i].isOdd;
   }
 
-  if (test.isMyStopwatch) {
-    test.stopwatch.stop();
-  }
+  test.stopwatch.stop();
 }
 
 /// The performance test #2
 ///
 void testProc2(PerfTestOne test, int lapNo) {
-  if (test.isMyStopwatch) {
-    test.stopwatch.start();
+  for (var i = 0, n = codeUnits.length; i < n; i++) {
+    final c = codeUnits[i];
+    c.isEven;
+    c.isOdd;
   }
+}
+
+/// Performance test #2 with the user-controlled stopwatch
+///
+void testProc2w(PerfTestOne test, int lapNo) {
+  test.stopwatch.start();
 
   for (var i = 0, n = codeUnits.length; i < n; i++) {
     final c = codeUnits[i];
@@ -108,41 +128,49 @@ void testProc2(PerfTestOne test, int lapNo) {
     c.isOdd;
   }
 
-  if (test.isMyStopwatch) {
-    test.stopwatch.stop();
-  }
+  test.stopwatch.stop();
 }
 
 /// The performance test #3
 ///
 void testProc3(PerfTestOne test, int lapNo) {
-  if (test.isMyStopwatch) {
-    test.stopwatch.start();
+  for (var i = codeUnits.length; --i >= 0;) {
+    codeUnits[i].isEven;
+    codeUnits[i].isOdd;
   }
+}
+
+/// Performance test #3 with the user-controlled stopwatch
+///
+void testProc3w(PerfTestOne test, int lapNo) {
+  test.stopwatch.start();
 
   for (var i = codeUnits.length; --i >= 0;) {
     codeUnits[i].isEven;
     codeUnits[i].isOdd;
   }
 
-  if (test.isMyStopwatch) {
-    test.stopwatch.stop();
-  }
+  test.stopwatch.stop();
 }
 
 /// The performance test #4
 ///
 void testProc4(PerfTestOne test, int lapNo) {
-  if (test.isMyStopwatch) {
-    test.stopwatch.start();
+  for (var c in codeUnits) {
+    c.isEven;
+    c.isOdd;
   }
+}
+
+/// Performance test #4 with the user-controlled stopwatch
+///
+void testProc4w(PerfTestOne test, int lapNo) {
+  test.stopwatch.start();
 
   for (var c in codeUnits) {
     c.isEven;
     c.isOdd;
   }
 
-  if (test.isMyStopwatch) {
-    test.stopwatch.stop();
-  }
+  test.stopwatch.stop();
 }
