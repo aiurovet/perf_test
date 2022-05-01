@@ -159,13 +159,21 @@ class PerfTestFmt {
 
   /// The numeric value formatter
   ///
-  String number(num value, [int maxWidth = 0]) =>
-      string(numberFormat.format(value), maxWidth, true);
+  String number(num value, [int maxWidth = 0]) {
+    if (style.isPretty) {
+      return string(numberFormat.format(value), maxWidth, true);
+    }
+    return value.toString();
+  }
 
   /// The percentage value formatter
   ///
-  String percent(num value, [int maxWidth = 0]) =>
-      string(percentFormat.format(value), maxWidth, true);
+  String percent(num value, [int maxWidth = 0]) {
+    if (style.isPretty) {
+      return string(percentFormat.format(value), maxWidth, true);
+    }
+    return value.toStringAsFixed(2);
+  }
 
   /// The time value formatter
   ///
@@ -175,6 +183,10 @@ class PerfTestFmt {
   /// The string value formatter
   ///
   String string(String value, [int maxWidth = 0, bool padLeft = false]) {
+    if (!style.isPretty) {
+      return value;
+    }
+
     final deltaWidth = maxWidth - value.length;
 
     if (deltaWidth <= 0) {

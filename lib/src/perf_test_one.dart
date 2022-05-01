@@ -167,22 +167,14 @@ class PerfTestOne {
       ratio = (value2 / value1);
     }
 
-    if (format.style.isPretty) {
-      outRatio = format.percent(ratio);
-    } else {
-      outRatio = ratio.toStringAsFixed(2);
-    }
+    outRatio = format.percent(ratio);
   }
 
   /// Serializer of the mode-specific value
   ///
   void setOutValue() {
     if (isOutLaps) {
-      if (format.style.isPretty) {
-        outValue = format.number(laps);
-      } else {
-        outValue = laps.toString();
-      }
+      outValue = format.number(laps);
     } else {
       outValue = span.toString();
     }

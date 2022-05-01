@@ -22,7 +22,7 @@ int? laps;
 void exec({PerfTestFmt? format}) {
   final lotName = format?.style.isPretty ?? false
       ? '\nComparing loops - {M} - {D} at {T}'
-      : 'Comparing loops,,';
+      : 'Comparing loops,{M},';
 
   PerfTestLot(lotName, isMyStopwatch: false, format: format)
     ..add(PerfTestOne('For', testProc: testProc1))
