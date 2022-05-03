@@ -3,14 +3,14 @@
 
 import 'package:perf_test/perf_test.dart';
 
-/// A class to display of test and test lot results
+/// Display the result of testing a lot
 ///
 class PerfTestOut {
-  /// The formatter
+  /// Look and feel of the output
   ///
   late final PerfTestFormat format;
 
-  /// The convenience lot object
+  /// Convenience lot object
   ///
   final PerfTestLot lot;
 
@@ -20,7 +20,7 @@ class PerfTestOut {
     format = lot.format;
   }
 
-  /// The printing
+  /// Actual output
   ///
   void exec() {
     _execName();
@@ -54,17 +54,7 @@ class PerfTestOut {
     return fieldValue;
   }
 
-  /// The printing of a part
-  ///
-  void _execName() {
-    final name = _getName();
-
-    if (name != null) {
-      format.printer(name);
-    }
-  }
-
-  /// The printing of a single line of data
+  /// Output single line of data
   ///
   void _execData(String? border, String lineFormat) {
     final count = lot.tests.length;
@@ -85,6 +75,16 @@ class PerfTestOut {
 
     if (border != null) {
       format.printer(border);
+    }
+  }
+
+  /// Output the lot name
+  ///
+  void _execName() {
+    final name = _getName();
+
+    if (name != null) {
+      format.printer(name);
     }
   }
 

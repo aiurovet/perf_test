@@ -3,14 +3,14 @@
 
 import 'package:perf_test/perf_test.dart';
 
-/// A type for the actual user-defined procedure to test
+/// Actual user-defined procedure to test
 ///
 typedef PerfTestOneProc = void Function(PerfTestOne test, int lapNo);
 
-/// A type for the user-defined procedure to show lot result
+/// User-defined procedure to show lot result
 ///
 typedef PerfTestOutProc = void Function(PerfTestLot lot);
 
-/// A type for the printing routine
+/// Lowest level printing routine
 ///
 typedef PerfTestPrinter = void Function(String);

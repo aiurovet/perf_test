@@ -3,7 +3,7 @@
 
 import 'package:perf_test/perf_test.dart';
 
-/// A class to group multiple tests and calculate mutual rates
+/// Group multiple tests and run everything, then output
 ///
 class PerfTestLot {
   /// Output format
@@ -23,39 +23,39 @@ class PerfTestLot {
   ///
   bool isOutLaps = false;
 
-  /// The length of test as a number of repeats
+  /// Longevity of each test as a number of repeats (rather than [maxSpan])
   ///
   int? maxLaps;
 
-  /// The maximum test name width
+  /// Maximum test name width (calculated)
   ///
   var maxNameWidth = 0;
 
-  /// The maximum ratio display width
+  /// Maximum ratio display width (calculated)
   ///
   var maxRatioWidth = 0;
 
-  /// The length of test as duration
+  /// Longevity of each test as duration (rather than [maxLaps])
   ///
   Duration? maxSpan;
 
-  /// Maximum value display width (laps or span)
+  /// Maximum value display width (laps or span, calculated)
   ///
   var maxValueWidth = 0;
 
-  /// The name of the lot
+  /// Name of the lot (calculated)
   ///
   final String name;
 
-  /// The actual user-defined procedure to display the result
+  /// Output engine
   ///
   late final PerfTestOut out;
 
-  /// The lot-wide stopwatch used to measure performance
+  /// Stopwatch used to measure performance in every test (internal or passed by you)
   ///
   late final Stopwatch? stopwatch;
 
-  /// The actual number of the test iterations upon execution completion
+  /// List of all singular tests
   ///
   final tests = <PerfTestOne>[];
 
@@ -72,11 +72,11 @@ class PerfTestLot {
     this.stopwatch = stopwatch ?? Stopwatch();
   }
 
-  /// The PerfTestOne adder
+  /// Accumulator
   ///
   void add(PerfTestOne test) => tests.add(test.initLot(this));
 
-  /// and calculate maximum widths for all columns
+  /// Calculate ratios as well as maximum widths for all columns if needed
   ///
   void createRatios() {
     final testCount = tests.length;
@@ -105,7 +105,7 @@ class PerfTestLot {
     }
   }
 
-  /// The runner
+  /// Execute all tests and output results
   ///
   void exec({int? maxLaps, Duration? maxSpan}) {
     this.maxLaps = maxLaps;

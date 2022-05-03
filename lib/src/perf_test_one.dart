@@ -3,7 +3,7 @@
 
 import 'package:perf_test/perf_test.dart';
 
-/// A wrapper class to execute user-defined procedures multiple times
+/// Wrapper class to execute user-defined procedures multiple times
 /// and measure either actual laps for a given time span or time
 /// span for a given number of iterations
 ///
@@ -82,11 +82,11 @@ class PerfTestOne {
     }
   }
 
-  /// The default dummy test proc
+  /// Dummy test proc
   ///
   static void emptyTestProc(PerfTestOne test, int lapNo) {}
 
-  /// The test runner
+  /// Actual test execution
   ///
   PerfTestOne exec({int? maxLaps, Duration? maxSpan}) {
     stopwatch.reset();
@@ -137,7 +137,8 @@ class PerfTestOne {
     return this;
   }
 
-  /// The parent initializer
+  /// Initialize parent property with [newLot] as well as
+  /// initialize convenience properties depending on that
   ///
   PerfTestOne initLot(PerfTestLot newLot) {
     lot = newLot;
@@ -181,13 +182,13 @@ class PerfTestOne {
   }
 }
 
-/// A helper static method to create Duration from a total number of milliseconds
+/// Helper static method to create Duration from a total number of milliseconds
 ///
 Duration durationFromMilliseconds(int totalMilliseconds) =>
     durationFromMicroseconds(
         totalMilliseconds * Duration.microsecondsPerMillisecond);
 
-/// A helper static method to create Duration from a total number of microseconds
+/// Helper static method to create Duration from a total number of microseconds
 ///
 Duration durationFromMicroseconds(int totalMicroseconds) {
   final days = totalMicroseconds ~/ Duration.microsecondsPerDay;
