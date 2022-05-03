@@ -1,3 +1,7 @@
+## 0.1.3
+
+Extended the package description in pubspec.yaml
+
 ## 0.1.2
 
 - Documentation enhanced.
