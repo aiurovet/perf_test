@@ -7,10 +7,6 @@ import 'package:perf_test/perf_test.dart';
 ///
 typedef PerfTestOneProc = void Function(PerfTestOne test, int lapNo);
 
-/// Simplified name for [PerfTestOneProc]
-///
-typedef PerfTestProc = PerfTestOneProc;
-
 /// User-defined procedure to show lot result
 ///
 typedef PerfTestOutProc = void Function(PerfTestLot lot);
