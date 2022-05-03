@@ -1,8 +1,11 @@
-A set of classes to run performance tests
+A set of classes to run performance test(s) and compare results against the first test
 
 ## Features
 
-Allows to check performance as well as to run multiple performance tests and compare results against the first test
+- Check the performance of a single test or run multiple performance tests and compare results against the first test
+- Display results as either a grid or a field-separated values list (CSV, tab-separated, pipe-separated, etc.)
+- Change the sequence of fields and even break into multiple outputs by manipulating placeholders
+- Turn the stopwatch on and off in your code, achieving better result precision
 
 ## Usage
 
