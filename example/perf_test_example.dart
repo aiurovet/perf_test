@@ -18,7 +18,7 @@ int? laps;
 /// Actual execution with the pretty output
 ///
 void execPretty({PerfTestFormat? format}) {
-  PerfTestLot('\nComparing loops - {M} - {D} at {T}')
+  PerfTestLot('\nComparing loops - {M} - {D}')
     ..add(PerfTestOne('For, "as primary"', testProc: testProc1))
     ..add(PerfTestOne('ForEx', testProc: testProc2))
     ..add(PerfTestOne('ForRev', testProc: testProc3))
