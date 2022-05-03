@@ -20,10 +20,7 @@ int? laps;
 /// The actual execution with the pretty output
 ///
 void execPretty({PerfTestFormat? format}) {
-  final dataStyle = PerfTestDataStyle(PerfTestDataStyle.percent);
-  final format = PerfTestFormat(dataStyle: dataStyle);
-
-  PerfTestLot('\nComparing loops - {M} - {D} at {T}', format: format)
+  PerfTestLot('\nComparing loops - {M} - {D} at {T}')
     ..add(PerfTestOne('For, "as primary"', testProc: testProc1))
     ..add(PerfTestOne('ForEx', testProc: testProc2))
     ..add(PerfTestOne('ForRev', testProc: testProc3))
@@ -34,10 +31,7 @@ void execPretty({PerfTestFormat? format}) {
 /// The actual execution with the raw output
 ///
 void execRaw({PerfTestFormat? format}) {
-  final dataStyle = PerfTestDataStyle(PerfTestDataStyle.raw);
-  final format = PerfTestFormat(fieldSeparator: ',', printer: printErr, dataStyle: dataStyle);
-
-  PerfTestLot('Comparing loops,{M},', isMyStopwatch: true, format: format)
+  PerfTestLot('Comparing loops,{M},', isMyStopwatch: true, format: PerfTestFormat.rawCsv)
     ..add(PerfTestOne('For, "as primary"', testProc: testProc1w))
     ..add(PerfTestOne('ForEx', testProc: testProc2w))
     ..add(PerfTestOne('ForRev', testProc: testProc3w))

@@ -23,10 +23,18 @@ class PerfTestOut {
   /// The printing
   ///
   void exec() {
-    final border = _getBorder();
+    _execName();
 
-    _execName(border);
-    _execData(border);
+    final lineFormats = format.lineFormat.split('\n');
+
+    for (var lineFormat in lineFormats) {
+      final border = _getBorder(lineFormat);
+      _execData(border, lineFormat);
+    }
+
+    if (!format.dataStyle.isRaw) {
+      format.printer('');
+    }
   }
 
   /// Ensure every string is embraced in quotes if needed, all internal quotes are escaped,
@@ -48,29 +56,31 @@ class PerfTestOut {
 
   /// The printing of a part
   ///
-  void _execName(String? border) {
+  void _execName() {
     final name = _getName();
 
     if (name != null) {
       format.printer(name);
     }
-
-    if (lot.tests.isNotEmpty && (border != null)) {
-      format.printer(border);
-    }
   }
 
   /// The printing of a single line of data
   ///
-  void _execData(String? border) {
+  void _execData(String? border, String lineFormat) {
     final count = lot.tests.length;
 
     if (count <= 0) {
       return;
     }
 
+    final newLine = format.dataStyle.isRaw ? '' : '\n';
+
+    if (border != null) {
+      format.printer(newLine + border);
+    }
+
     for (var i = 0; i < count; i++) {
-      format.printer(_getData(i));
+      format.printer(_getData(lineFormat, i));
     }
 
     if (border != null) {
@@ -80,23 +90,37 @@ class PerfTestOut {
 
   /// Initialize line border
   ///
-  String? _getBorder() {
-    if (format.fieldSeparator.isNotEmpty) {
+  String? _getBorder(String lineFormat) {
+    if (format.horBarChar.isEmpty || format.dataStyle.isRaw) {
       return null;
     }
 
-    return format.cornerChar +
-        format.horBarChar * (1 + lot.maxNameWidth + 1) +
-        format.cornerChar +
-        format.horBarChar * (1 + lot.maxRatioWidth + 1) +
-        format.cornerChar +
-        format.horBarChar * (1 + lot.maxValueWidth + 1) +
-        format.cornerChar;
+    final border = lineFormat.replaceAllMapped(PerfTestFormat.stubRE, (match) {
+      var stub = lineFormat.substring(match.start, match.end);
+      var size = 0;
+
+      switch (stub) {
+        case PerfTestFormat.stubFieldName:
+          size = lot.maxNameWidth;
+          break;
+        case PerfTestFormat.stubFieldRatio:
+          size = lot.maxRatioWidth;
+          break;
+        case PerfTestFormat.stubFieldValue:
+          size = lot.maxValueWidth;
+          break;
+      }
+      return format.horBarChar * size;
+    });
+
+    return border
+      .replaceAll(format.fieldSeparator, format.cornerChar)
+      .replaceAll(' ', format.horBarChar);
   }
 
   /// Initialize line data
   ///
-  String _getData(int index) {
+  String _getData(String lineFormat, int index) {
     final test = lot.tests[index];
 
     var outName = test.name;
@@ -104,11 +128,11 @@ class PerfTestOut {
     var outRatio = test.outRatio;
 
     if (format.dataStyle.isRaw) {
-      final sep = format.fieldSeparator;
-
       outName = _adjustQuotes(outName);
       outRatio = _adjustQuotes(outRatio);
       outValue = _adjustQuotes(outValue);
+
+      final sep = format.fieldSeparator;
 
       return outName + sep + outRatio + sep + outValue;
     }
@@ -121,9 +145,10 @@ class PerfTestOut {
     outValue = format.string(outValue, lot.maxValueWidth, true);
     outRatio = format.string(outRatio, lot.maxRatioWidth, true);
 
-    final sep = format.verBarChar;
-
-    return '$sep $outName $sep $outRatio $sep $outValue $sep';
+    return lineFormat
+      .replaceAll(PerfTestFormat.stubFieldName, outName)
+      .replaceAll(PerfTestFormat.stubFieldRatio, outRatio)
+      .replaceAll(PerfTestFormat.stubFieldValue, outValue);
   }
 
   /// Expand and return name

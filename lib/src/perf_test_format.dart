@@ -9,7 +9,23 @@ import 'package:perf_test/perf_test.dart';
 class PerfTestFormat {
   /// Placeholder for the current date in the caption
   ///
+  static final RegExp stubRE = RegExp(r'\{[A-Z]+\}', caseSensitive: false);
+
+  /// Placeholder for the current date in the caption
+  ///
   static const String stubDate = '{D}';
+
+  /// Placeholder for the current date in the caption
+  ///
+  static const String stubFieldName = '{N}';
+
+  /// Placeholder for the current date in the caption
+  ///
+  static const String stubFieldRatio = '{R}';
+
+  /// Placeholder for the current date in the caption
+  ///
+  static const String stubFieldValue = '{V}';
 
   /// Placeholder for the limit (maxLaps or maxSpan) in the caption
   ///
@@ -19,110 +35,108 @@ class PerfTestFormat {
   ///
   static const String stubTime = '{T}';
 
-  /// The character for the horizontal bar
+  /// Character for drawing grid corners and crossings
   ///
-  String horBarChar = '-';
+  late final String cornerChar;
 
-  /// The character for the vertical bar
+  /// Character for drawing horizontal bar
   ///
-  String verBarChar = '|';
-
-  /// The character for the corners of the border
-  ///
-  String cornerChar = '+';
+  late final String horBarChar;
 
   /// The format for dates
   ///
-  DateFormat dateFormat = DateFormat.yMMMMd();
+  late final DateFormat dateFormat;
 
   /// The format for datetimes
   ///
-  DateFormat dateTimeFormat = DateFormat();
+  late final DateFormat dateTimeFormat;
 
-  /// The field separator in case of FSV output
+  /// First character in lineFormat after all stubs removed
+  /// (not found => space)
   ///
-  String fieldSeparator = '';
+  late final String fieldSeparator;
 
   /// The number for infinity
   ///
-  num infinity = 9999.99;
+  late final num? infinity;
+
+  /// Flag indicating the need to embrace a field in quotes
+  /// when necessary (i.e. [lineFormat] does not start with '{')
+  ///
+  late final bool isQuoted;
+
+  /// Format of a line
+  /// (see the default value in the constructor as an example)
+  ///
+  String lineFormat;
 
   /// The format for numbers
   ///
-  NumberFormat numberFormat = NumberFormat();
+  late final NumberFormat numberFormat;
 
   /// The format for numbers
   ///
-  NumberFormat percentFormat = NumberFormat.percentPattern();
+  late final NumberFormat percentFormat;
 
   /// The actual function to send to the output
   ///
   late final PerfTestPrinter printer;
 
-  /// The embracing quote character if [fieldSeparator] is not empty
+  /// The embracing quote character if [rawFieldSeparator] is not empty
   ///
-  String quote = '"';
+  late final String quote;
 
   /// The escaped version of [quote]
   ///
-  String quoteEscaped = '""';
+  late final String quoteEscaped;
 
   /// Bitwise combination of style* constants
   ///
-  PerfTestDataStyle dataStyle = PerfTestDataStyle();
+  late final PerfTestDataStyle dataStyle;
 
   /// The format for times
   ///
-  DateFormat timeFormat = DateFormat.Hm();
+  late final DateFormat timeFormat;
+
+  ///
+  ///
+  static final PerfTestFormat prettyCsv = createFsv();
+
+  ///
+  ///
+  static final PerfTestFormat rawCsv = createFsv(
+    dataStyleFlags: PerfTestDataStyle.raw);
 
   /// The constructor
   ///
   PerfTestFormat(
-      {String? horBarChar,
-      String? verBarChar,
-      String? cornerChar,
-      String? fieldSeparator,
-      num? infinity,
-      // true = display percentage as a number (only if percentFormat is null)
-      PerfTestPrinter? printer,
-      String? quote,
-      String? quoteEscaped,
+      {String? borderFormat = '+-',
+      this.lineFormat = '| $stubFieldName | $stubFieldValue | $stubFieldRatio |',
+      this.infinity = 9999.99,
+      this.printer = print,
+      this.quote = '"',
+      this.quoteEscaped = '""',
       PerfTestDataStyle? dataStyle,
       DateFormat? dateFormat,
       DateFormat? dateTimeFormat,
       NumberFormat? numberFormat,
       NumberFormat? percentFormat,
       DateFormat? timeFormat}) {
-    this.printer = printer ?? print;
+    this.dataStyle = dataStyle ?? PerfTestDataStyle();
 
-    if (dataStyle != null) {
-      this.dataStyle = dataStyle;
+    this.dateFormat = dateFormat ?? DateFormat();
+    this.dateTimeFormat = dateTimeFormat ?? this.dateFormat;
+
+    if ((borderFormat != null) && borderFormat.isNotEmpty) {
+      cornerChar = borderFormat[0];
+      horBarChar = borderFormat[borderFormat.length - 1];
+    } else {
+      cornerChar = '';
+      horBarChar = '';
     }
 
-    if (verBarChar != null) {
-      this.verBarChar = verBarChar;
-    }
-    if (horBarChar != null) {
-      this.horBarChar = horBarChar;
-    }
-    if (cornerChar != null) {
-      this.cornerChar = cornerChar;
-    }
-    if (dateFormat != null) {
-      this.dateFormat = dateFormat;
-    }
-    if (dateTimeFormat != null) {
-      this.dateTimeFormat = dateTimeFormat;
-    }
-    if (fieldSeparator != null) {
-      this.fieldSeparator = fieldSeparator;
-    }
-    if (infinity != null) {
-      this.infinity = infinity;
-    }
-    if (numberFormat != null) {
-      this.numberFormat = numberFormat;
-    }
+    this.numberFormat = numberFormat ?? NumberFormat();
+
     if (percentFormat != null) {
       this.percentFormat = percentFormat;
     } else if (this.dataStyle.isPercent) {
@@ -130,16 +144,21 @@ class PerfTestFormat {
     } else {
       this.percentFormat = NumberFormat('#,##0.00');
     }
-    if (quote != null) {
-      this.quote = quote;
-    }
-    if (quoteEscaped != null) {
-      this.quoteEscaped = quoteEscaped;
-    }
-    if (timeFormat != null) {
-      this.timeFormat = timeFormat;
-    }
+
+    this.timeFormat = timeFormat ?? DateFormat.Hm();
+
+    final nonStub = lineFormat.replaceAll(stubRE, '');
+    fieldSeparator = (nonStub.isEmpty ? ' ' : nonStub[0]);
   }
+
+  /// The date value formatter
+  ///
+  static PerfTestFormat createFsv({
+    String fieldSeparator = ',',
+    int dataStyleFlags = PerfTestDataStyle.raw}) => PerfTestFormat(
+      borderFormat: '',
+      lineFormat: stubFieldName + fieldSeparator + stubFieldRatio + fieldSeparator+ stubFieldValue,
+      dataStyle: PerfTestDataStyle(dataStyleFlags));
 
   /// The date value formatter
   ///

@@ -1,7 +1,7 @@
 // Copyright (c) 2022, Alexander Iurovetski
 // All rights reserved under MIT license (see LICENSE file)
 
-/// The output style for data (names, values and ratios)
+/// The output style for the data (names, values and ratios)
 ///
 class PerfTestDataStyle {
   /// Style: print percentage as percentage rather than a number

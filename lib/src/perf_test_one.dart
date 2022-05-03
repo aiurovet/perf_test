@@ -161,13 +161,13 @@ class PerfTestOne {
 
     if (value1 == value2) {
       ratio = 1;
-    } else if (value1 == 0) {
-      ratio = format.infinity;
+    } else if (value2 == 0) {
+      ratio = format.infinity ?? -1;
     } else {
       ratio = (value1 / value2);
     }
 
-    outRatio = format.percent(ratio);
+    outRatio = (ratio < 0 ? '' : format.percent(ratio));
   }
 
   /// Serializer of the mode-specific value
