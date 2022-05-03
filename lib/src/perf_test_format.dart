@@ -88,7 +88,7 @@ class PerfTestFormat {
   ///
   late final PerfTestPrinter printer;
 
-  /// Embracing quote character if [rawFieldSeparator] is not empty
+  /// Embracing quote character if [isRaw] is true
   ///
   late final String quote;
 
