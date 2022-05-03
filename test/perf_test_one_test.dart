@@ -43,6 +43,7 @@ void main() {
       t2.isOutLaps = true;
 
       t2.setRatio(t1);
+      t2.format = t1.format;
 
       expect(t2.ratio, 0.5);
       expect(t2.outRatio, '0.50');
@@ -53,11 +54,28 @@ void main() {
       t1.format = format;
 
       final t2 = PerfTestOne('T2', format: format);
+      t2.format = t1.format;
       t2.span = Duration(seconds: 6, milliseconds: 912);
       t2.setRatio(t1);
 
       expect(t2.ratio, 2.0);
       expect(t2.outRatio, '200%');
+    });
+    test('setRatio - infinity', () {
+      final format = PerfTestFormat();
+      t1.format = format;
+      t1.isOutLaps = true;
+      t1.laps = 0;
+
+      final t2 = PerfTestOne('T2', format: format);
+      t2.format = format;
+      t2.isOutLaps = true;
+      t2.laps = t1.laps + 1;
+      t2.setRatio(t1);
+
+      expect(t2.ratio, format.infinity);
+      expect(t2.outRatio,
+          (format.infinity == null ? '' : format.number(format.infinity!)));
     });
   });
   group('durationFromMilliseconds - ', () {
