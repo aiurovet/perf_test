@@ -4,13 +4,9 @@
 import 'package:intl/intl.dart';
 import 'package:perf_test/perf_test.dart';
 
-/// The output format for all tests
+/// Output format for all tests
 ///
 class PerfTestFormat {
-  /// Placeholder for the current date in the caption
-  ///
-  static final RegExp stubRE = RegExp(r'\{[A-Z]+\}', caseSensitive: false);
-
   /// Placeholder for the current date in the caption
   ///
   static const String stubDate = '{D}';
@@ -35,6 +31,10 @@ class PerfTestFormat {
   ///
   static const String stubTime = '{T}';
 
+  /// Placeholder for the current date in the caption
+  ///
+  static final RegExp stubRE = RegExp(r'\{[A-Z]+\}', caseSensitive: false);
+
   /// Character for drawing grid corners and crossings
   ///
   late final String cornerChar;
@@ -43,20 +43,20 @@ class PerfTestFormat {
   ///
   late final String horBarChar;
 
-  /// The format for dates
+  /// Format for dates
   ///
   late final DateFormat dateFormat;
 
-  /// The format for datetimes
+  /// Format for datetimes
   ///
   late final DateFormat dateTimeFormat;
 
-  /// First character in lineFormat after all stubs removed
+  /// First character in [lineFormat] after all stubs removed
   /// (not found => space)
   ///
   late final String fieldSeparator;
 
-  /// The number for infinity
+  /// Special number for infinity (to keep data numeric)
   ///
   late final num? infinity;
 
@@ -65,36 +65,42 @@ class PerfTestFormat {
   ///
   late final bool isQuoted;
 
-  /// Format of a line
-  /// (see the default value in the constructor as an example)
+  /// Format of a line (see the default value in the constructor as an example)
+  ///
+  /// Allows to split the output in blocks using '\n':
+  /// '| {N} | {R} |\n| {N} | {V} |'
   ///
   String lineFormat;
 
-  /// The format for numbers
+  /// Flag to convert ratio to percentage rather than to leave it as a number
+  ///
+  bool usePercent;
+
+  /// Flag to avoid nice formatting of data and printing a grid around
+  ///
+  bool isRaw;
+
+  /// Format for numbers
   ///
   late final NumberFormat numberFormat;
 
-  /// The format for numbers
+  /// Format for numbers
   ///
   late final NumberFormat percentFormat;
 
-  /// The actual function to send to the output
+  /// Actual function to send to the output, defaults to [print] from dart:core
   ///
   late final PerfTestPrinter printer;
 
-  /// The embracing quote character if [rawFieldSeparator] is not empty
+  /// Embracing quote character if [rawFieldSeparator] is not empty
   ///
   late final String quote;
 
-  /// The escaped version of [quote]
+  /// Escaped version of [quote]
   ///
   late final String quoteEscaped;
 
-  /// Bitwise combination of style* constants
-  ///
-  late final PerfTestDataStyle dataStyle;
-
-  /// The format for times
+  /// Format for times
   ///
   late final DateFormat timeFormat;
 
@@ -104,26 +110,25 @@ class PerfTestFormat {
 
   ///
   ///
-  static final PerfTestFormat rawCsv = createFsv(
-    dataStyleFlags: PerfTestDataStyle.raw);
+  static final PerfTestFormat rawCsv = createFsv(isRaw: true);
 
   /// The constructor
   ///
   PerfTestFormat(
       {String? borderFormat = '+-',
-      this.lineFormat = '| $stubFieldName | $stubFieldValue | $stubFieldRatio |',
+      this.lineFormat =
+          '| $stubFieldName | $stubFieldRatio | $stubFieldValue |',
       this.infinity = 9999.99,
+      this.isRaw = false,
       this.printer = print,
       this.quote = '"',
       this.quoteEscaped = '""',
-      PerfTestDataStyle? dataStyle,
+      this.usePercent = false,
       DateFormat? dateFormat,
       DateFormat? dateTimeFormat,
       NumberFormat? numberFormat,
       NumberFormat? percentFormat,
       DateFormat? timeFormat}) {
-    this.dataStyle = dataStyle ?? PerfTestDataStyle();
-
     this.dateFormat = dateFormat ?? DateFormat();
     this.dateTimeFormat = dateTimeFormat ?? this.dateFormat;
 
@@ -139,7 +144,7 @@ class PerfTestFormat {
 
     if (percentFormat != null) {
       this.percentFormat = percentFormat;
-    } else if (this.dataStyle.isPercent) {
+    } else if (usePercent) {
       this.percentFormat = NumberFormat.percentPattern();
     } else {
       this.percentFormat = NumberFormat('#,##0.00');
@@ -151,21 +156,28 @@ class PerfTestFormat {
     fieldSeparator = (nonStub.isEmpty ? ' ' : nonStub[0]);
   }
 
-  /// The date value formatter
+  /// Pre-defined format for the field-separated value output (raw)
   ///
-  static PerfTestFormat createFsv({
-    String fieldSeparator = ',',
-    int dataStyleFlags = PerfTestDataStyle.raw}) => PerfTestFormat(
-      borderFormat: '',
-      lineFormat: stubFieldName + fieldSeparator + stubFieldRatio + fieldSeparator+ stubFieldValue,
-      dataStyle: PerfTestDataStyle(dataStyleFlags));
+  static PerfTestFormat createFsv(
+          {String fieldSeparator = ',',
+          bool isRaw = true,
+          bool usePercent = false}) =>
+      PerfTestFormat(
+          borderFormat: '',
+          lineFormat: stubFieldName +
+              fieldSeparator +
+              stubFieldRatio +
+              fieldSeparator +
+              stubFieldValue,
+          isRaw: isRaw,
+          usePercent: usePercent);
 
-  /// The date value formatter
+  /// Date value formatter
   ///
   String date(DateTime value, [int maxWidth = 0]) =>
       string(dateFormat.format(value), maxWidth, true);
 
-  /// The date value formatter
+  /// Date/time value formatter
   ///
   String dateTime(DateTime value, [int maxWidth = 0]) => string(
       dateFormat.format(value) + ' ' + timeFormat.format(value),
@@ -182,33 +194,33 @@ class PerfTestFormat {
     return outValue.substring(0, outValue.length - 6 + precision);
   }
 
-  /// The numeric value formatter
+  /// Numeric value formatter
   ///
   String number(num value, [int maxWidth = 0]) {
-    if (dataStyle.isRaw) {
+    if (isRaw) {
       return value.toString();
     }
     return string(numberFormat.format(value), maxWidth, true);
   }
 
-  /// The percentage value formatter
+  /// Percentage value formatter
   ///
   String percent(num value, [int maxWidth = 0]) {
-    if (dataStyle.isRaw) {
+    if (isRaw) {
       return value.toStringAsFixed(2);
     }
     return string(percentFormat.format(value), maxWidth, true);
   }
 
-  /// The time value formatter
+  /// Time value formatter
   ///
   String time(DateTime value, [int maxWidth = 0]) =>
       string(timeFormat.format(value), maxWidth, true);
 
-  /// The string value formatter
+  /// String value formatter
   ///
   String string(String value, [int maxWidth = 0, bool padLeft = false]) {
-    if (dataStyle.isRaw) {
+    if (isRaw) {
       return value;
     }
 

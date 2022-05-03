@@ -32,7 +32,7 @@ class PerfTestOut {
       _execData(border, lineFormat);
     }
 
-    if (!format.dataStyle.isRaw) {
+    if (!format.isRaw) {
       format.printer('');
     }
   }
@@ -41,7 +41,7 @@ class PerfTestOut {
   /// and the field separator appended if the string does not represent the last field
   ///
   String _adjustQuotes(String fieldValue) {
-    final isRaw = format.dataStyle.isRaw;
+    final isRaw = format.isRaw;
     final hasQuote = isRaw && fieldValue.contains(format.quote);
     final hasSep = isRaw && fieldValue.contains(format.fieldSeparator);
 
@@ -73,7 +73,7 @@ class PerfTestOut {
       return;
     }
 
-    final newLine = format.dataStyle.isRaw ? '' : '\n';
+    final newLine = format.isRaw ? '' : '\n';
 
     if (border != null) {
       format.printer(newLine + border);
@@ -91,7 +91,7 @@ class PerfTestOut {
   /// Initialize line border
   ///
   String? _getBorder(String lineFormat) {
-    if (format.horBarChar.isEmpty || format.dataStyle.isRaw) {
+    if (format.horBarChar.isEmpty || format.isRaw) {
       return null;
     }
 
@@ -114,8 +114,8 @@ class PerfTestOut {
     });
 
     return border
-      .replaceAll(format.fieldSeparator, format.cornerChar)
-      .replaceAll(' ', format.horBarChar);
+        .replaceAll(format.fieldSeparator, format.cornerChar)
+        .replaceAll(' ', format.horBarChar);
   }
 
   /// Initialize line data
@@ -127,7 +127,7 @@ class PerfTestOut {
     var outValue = test.outValue;
     var outRatio = test.outRatio;
 
-    if (format.dataStyle.isRaw) {
+    if (format.isRaw) {
       outName = _adjustQuotes(outName);
       outRatio = _adjustQuotes(outRatio);
       outValue = _adjustQuotes(outValue);
@@ -146,9 +146,9 @@ class PerfTestOut {
     outRatio = format.string(outRatio, lot.maxRatioWidth, true);
 
     return lineFormat
-      .replaceAll(PerfTestFormat.stubFieldName, outName)
-      .replaceAll(PerfTestFormat.stubFieldRatio, outRatio)
-      .replaceAll(PerfTestFormat.stubFieldValue, outValue);
+        .replaceAll(PerfTestFormat.stubFieldName, outName)
+        .replaceAll(PerfTestFormat.stubFieldRatio, outRatio)
+        .replaceAll(PerfTestFormat.stubFieldValue, outValue);
   }
 
   /// Expand and return name

@@ -80,7 +80,7 @@ class PerfTestLot {
   ///
   void createRatios() {
     final testCount = tests.length;
-    final isRaw = format.dataStyle.isRaw;
+    final isRaw = format.isRaw;
 
     // Collect all single test ratios and calculate max widths
     //

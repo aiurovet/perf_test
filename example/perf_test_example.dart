@@ -1,8 +1,6 @@
 // Copyright (c) 2022, Alexander Iurovetski
 // All rights reserved under MIT license (see LICENSE file)
 
-import 'print_err_io.dart' if (dart.library.html) 'print_err_html.dart';
-
 import 'package:perf_test/perf_test.dart';
 
 /// Test data holder
@@ -17,7 +15,7 @@ Duration? span;
 ///
 int? laps;
 
-/// The actual execution with the pretty output
+/// Actual execution with the pretty output
 ///
 void execPretty({PerfTestFormat? format}) {
   PerfTestLot('\nComparing loops - {M} - {D} at {T}')
@@ -28,10 +26,11 @@ void execPretty({PerfTestFormat? format}) {
     ..exec(maxLaps: laps, maxSpan: span);
 }
 
-/// The actual execution with the raw output
+/// Actual execution with the raw output
 ///
 void execRaw({PerfTestFormat? format}) {
-  PerfTestLot('Comparing loops,{M},', isMyStopwatch: true, format: PerfTestFormat.rawCsv)
+  PerfTestLot('Comparing loops,{M},',
+      isMyStopwatch: true, format: PerfTestFormat.rawCsv)
     ..add(PerfTestOne('For, "as primary"', testProc: testProc1w))
     ..add(PerfTestOne('ForEx', testProc: testProc2w))
     ..add(PerfTestOne('ForRev', testProc: testProc3w))
@@ -101,7 +100,7 @@ void testProc1w(PerfTestOne test, int lapNo) {
   test.stopwatch.stop();
 }
 
-/// The performance test #2
+/// Performance test #2
 ///
 void testProc2(PerfTestOne test, int lapNo) {
   for (var i = 0, n = codeUnits.length; i < n; i++) {
@@ -125,7 +124,7 @@ void testProc2w(PerfTestOne test, int lapNo) {
   test.stopwatch.stop();
 }
 
-/// The performance test #3
+/// Performance test #3
 ///
 void testProc3(PerfTestOne test, int lapNo) {
   for (var i = codeUnits.length; --i >= 0;) {
@@ -147,7 +146,7 @@ void testProc3w(PerfTestOne test, int lapNo) {
   test.stopwatch.stop();
 }
 
-/// The performance test #4
+/// Performance test #4
 ///
 void testProc4(PerfTestOne test, int lapNo) {
   for (var c in codeUnits) {
