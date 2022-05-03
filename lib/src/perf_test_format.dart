@@ -96,11 +96,11 @@ class PerfTestFormat {
   ///
   late final String quoteEscaped;
 
-  ///
+  /// Convenience pre-created object for the CSV output with formatted data
   ///
   static final PerfTestFormat prettyCsv = createFsv();
 
-  ///
+  /// Convenience pre-created object for the CSV output with raw (unformatted) data
   ///
   static final PerfTestFormat rawCsv = createFsv(isRaw: true);
 

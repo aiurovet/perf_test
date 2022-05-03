@@ -65,7 +65,7 @@ class PerfTestOne {
   ///
   final PerfTestOneProc testProc;
 
-  /// Constructor
+  /// The constructor
   ///
   PerfTestOne(this.name,
       {PerfTestFormat? format,
