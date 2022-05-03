@@ -27,10 +27,6 @@ class PerfTestFormat {
   ///
   static const String stubSize = '{M}';
 
-  /// Placeholder for the current time in the caption
-  ///
-  static const String stubTime = '{T}';
-
   /// Placeholder for the current date in the caption
   ///
   static final RegExp stubRE = RegExp(r'\{[A-Z]+\}', caseSensitive: false);
@@ -46,10 +42,6 @@ class PerfTestFormat {
   /// Format for dates
   ///
   late final DateFormat dateFormat;
-
-  /// Format for datetimes
-  ///
-  late final DateFormat dateTimeFormat;
 
   /// First character in [lineFormat] after all stubs removed
   /// (not found => space)
@@ -100,10 +92,6 @@ class PerfTestFormat {
   ///
   late final String quoteEscaped;
 
-  /// Format for times
-  ///
-  late final DateFormat timeFormat;
-
   ///
   ///
   static final PerfTestFormat prettyCsv = createFsv();
@@ -125,13 +113,8 @@ class PerfTestFormat {
       this.quoteEscaped = '""',
       this.usePercent = false,
       DateFormat? dateFormat,
-      DateFormat? dateTimeFormat,
       NumberFormat? numberFormat,
-      NumberFormat? percentFormat,
-      DateFormat? timeFormat}) {
-    this.dateFormat = dateFormat ?? DateFormat();
-    this.dateTimeFormat = dateTimeFormat ?? this.dateFormat;
-
+      NumberFormat? percentFormat}) {
     if ((borderFormat != null) && borderFormat.isNotEmpty) {
       cornerChar = borderFormat[0];
       horBarChar = borderFormat[borderFormat.length - 1];
@@ -140,6 +123,7 @@ class PerfTestFormat {
       horBarChar = '';
     }
 
+    this.dateFormat = dateFormat ?? DateFormat();
     this.numberFormat = numberFormat ?? NumberFormat();
 
     if (percentFormat != null) {
@@ -149,8 +133,6 @@ class PerfTestFormat {
     } else {
       this.percentFormat = NumberFormat('#,##0.00');
     }
-
-    this.timeFormat = timeFormat ?? DateFormat.Hm();
 
     final nonStub = lineFormat.replaceAll(stubRE, '');
     fieldSeparator = (nonStub.isEmpty ? ' ' : nonStub[0]);
@@ -176,13 +158,6 @@ class PerfTestFormat {
   ///
   String date(DateTime value, [int maxWidth = 0]) =>
       string(dateFormat.format(value), maxWidth, true);
-
-  /// Date/time value formatter
-  ///
-  String dateTime(DateTime value, [int maxWidth = 0]) => string(
-      dateFormat.format(value) + ' ' + timeFormat.format(value),
-      maxWidth,
-      true);
 
   /// Duration value formatter
   ///
@@ -211,11 +186,6 @@ class PerfTestFormat {
     }
     return string(percentFormat.format(value), maxWidth, true);
   }
-
-  /// Time value formatter
-  ///
-  String time(DateTime value, [int maxWidth = 0]) =>
-      string(timeFormat.format(value), maxWidth, true);
 
   /// String value formatter
   ///

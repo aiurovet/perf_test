@@ -160,9 +160,7 @@ class PerfTestOut {
       return name;
     }
 
-    final now = DateTime.now();
-    final date = format.date(now);
-    final time = format.time(now);
+    final date = format.date(DateTime.now());
     var size = '';
 
     final maxLaps = lot.maxLaps;
@@ -175,7 +173,6 @@ class PerfTestOut {
 
     return name
         .replaceAll(PerfTestFormat.stubDate, date)
-        .replaceAll(PerfTestFormat.stubSize, size)
-        .replaceAll(PerfTestFormat.stubTime, time);
+        .replaceAll(PerfTestFormat.stubSize, size);
   }
 }
