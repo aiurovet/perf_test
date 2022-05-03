@@ -68,6 +68,10 @@ class PerfTestFormat {
   ///
   bool usePercent;
 
+  /// Flag indicating that no output is expected
+  ///
+  bool isQuiet;
+
   /// Flag to avoid nice formatting of data and printing a grid around
   ///
   bool isRaw;
@@ -107,6 +111,7 @@ class PerfTestFormat {
       this.lineFormat =
           '| $stubFieldName | $stubFieldRatio | $stubFieldValue |',
       this.infinity = 9999.99,
+      this.isQuiet = false,
       this.isRaw = false,
       this.printer = print,
       this.quote = '"',
@@ -156,12 +161,16 @@ class PerfTestFormat {
 
   /// Date value formatter
   ///
-  String date(DateTime value, [int maxWidth = 0]) =>
-      string(dateFormat.format(value), maxWidth, true);
+  String date(DateTime value, [int maxWidth = 0]) {
+    if (isRaw) {
+      return value.toString();
+    }
+    return string(dateFormat.format(value), maxWidth, true);
+  }
 
   /// Duration value formatter
   ///
-  String duration(Duration value, {int precision = 3}) {
+  String duration(Duration value, [int precision = 3]) {
     final outValue = value.toString();
     if (precision >= 6) {
       return outValue;

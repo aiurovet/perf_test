@@ -15,34 +15,36 @@ Duration? span;
 ///
 int? laps;
 
-/// Actual execution with the pretty output
+/// Execute multiple tests with the pretty output
 ///
-void execPretty({PerfTestFormat? format}) {
-  PerfTestLot('\nComparing loops - {M} - {D}')
-    ..add(PerfTestOne('For, "as primary"', testProc: testProc1))
-    ..add(PerfTestOne('ForEx', testProc: testProc2))
-    ..add(PerfTestOne('ForRev', testProc: testProc3))
-    ..add(PerfTestOne('ForEach', testProc: testProc4))
-    ..exec(maxLaps: laps, maxSpan: span);
-}
+void execPretty() => PerfTestLot('\nComparing loops - {M} - {D}')
+  ..add(PerfTestOne('For, "as primary"', testProc: testProc1))
+  ..add(PerfTestOne('ForEx', testProc: testProc2))
+  ..add(PerfTestOne('ForRev', testProc: testProc3))
+  ..add(PerfTestOne('ForEach', testProc: testProc4))
+  ..exec(maxLaps: laps, maxSpan: span);
 
-/// Actual execution with the raw output
+/// Execute single test with the pretty output
 ///
-void execRaw({PerfTestFormat? format}) {
-  PerfTestLot('Comparing loops,{M},',
-      isMyStopwatch: true, format: PerfTestFormat.rawCsv)
-    ..add(PerfTestOne('For, "as primary"', testProc: testProc1w))
-    ..add(PerfTestOne('ForEx', testProc: testProc2w))
-    ..add(PerfTestOne('ForRev', testProc: testProc3w))
-    ..add(PerfTestOne('ForEach', testProc: testProc4w))
-    ..exec(maxLaps: laps, maxSpan: span);
-}
+void execPrettyOne() => PerfTestOne('For, "as primary"', testProc: testProc1)
+    .exec(maxLaps: laps, maxSpan: span);
+
+/// Execute multiple tests with the raw output
+///
+void execRaw() => PerfTestLot('Comparing loops,{M},',
+    isMyStopwatch: true, format: PerfTestFormat.rawCsv)
+  ..add(PerfTestOne('For, "as primary"', testProc: testProc1w))
+  ..add(PerfTestOne('ForEx', testProc: testProc2w))
+  ..add(PerfTestOne('ForRev', testProc: testProc3w))
+  ..add(PerfTestOne('ForEach', testProc: testProc4w))
+  ..exec(maxLaps: laps, maxSpan: span);
 
 /// The entry point
 ///
 void main(List<String> args) {
   parseArgs(args);
   setUp();
+  execPrettyOne();
   execPretty();
   execRaw();
 }

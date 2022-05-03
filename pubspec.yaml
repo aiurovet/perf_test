@@ -1,5 +1,5 @@
 name: perf_test
-description: A wrapper class to run performance tests
+description: A set of classes to run performance tests
 version: 0.1.0
 homepage: https://github.com/aiurovet/perf_test/
 

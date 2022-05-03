@@ -23,6 +23,12 @@ class PerfTestOut {
   /// Actual output
   ///
   void exec() {
+    lot.createRatios();
+
+    if (lot.format.isQuiet) {
+      return;
+    }
+
     _execName();
 
     final lineFormats = format.lineFormat.split('\n');
@@ -157,7 +163,7 @@ class PerfTestOut {
     var name = lot.name;
 
     if (name.isEmpty) {
-      return name;
+      return null;
     }
 
     final date = format.date(DateTime.now());

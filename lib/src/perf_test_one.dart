@@ -3,6 +3,10 @@
 
 import 'package:perf_test/perf_test.dart';
 
+/// Simplified name for [PerfTestOne]
+///
+typedef PerfTest = PerfTestOne;
+
 /// Wrapper class to execute user-defined procedures multiple times
 /// and measure either actual laps for a given time span or time
 /// span for a given number of iterations
@@ -134,24 +138,50 @@ class PerfTestOne {
 
     setOutValue();
 
+    if (lot == null) {
+      final tmpLot = PerfTestLot('',
+          stopwatch: stopwatch, isMyStopwatch: isMyStopwatch, format: format)
+        ..add(this);
+
+      tmpLot.isOutLaps = isOutLaps;
+      tmpLot.maxLaps = maxLaps;
+      tmpLot.maxSpan = maxSpan;
+
+      initLot(tmpLot);
+      tmpLot.out.exec();
+      initLot(null);
+    }
+
     return this;
   }
 
   /// Initialize parent property with [newLot] as well as
   /// initialize convenience properties depending on that
   ///
-  PerfTestOne initLot(PerfTestLot newLot) {
+  PerfTestOne initLot(PerfTestLot? newLot) {
     lot = newLot;
 
-    format = newLot.format;
-    isMyStopwatch = newLot.isMyStopwatch;
-    isOutLaps = newLot.isOutLaps;
+    if (newLot != null) {
+      format = newLot.format;
+      isMyStopwatch = newLot.isMyStopwatch;
+      isOutLaps = newLot.isOutLaps;
 
-    if (newLot.stopwatch != null) {
-      stopwatch = newLot.stopwatch!;
+      if (newLot.stopwatch != null) {
+        stopwatch = newLot.stopwatch!;
+      }
     }
 
     return this;
+  }
+
+  /// Serializer of the mode-specific value
+  ///
+  void setOutValue() {
+    if (isOutLaps) {
+      outValue = format.number(laps);
+    } else {
+      outValue = format.duration(span);
+    }
   }
 
   /// Calculate ratio against another test
@@ -169,16 +199,6 @@ class PerfTestOne {
     }
 
     outRatio = (ratio < 0 ? '' : format.percent(ratio));
-  }
-
-  /// Serializer of the mode-specific value
-  ///
-  void setOutValue() {
-    if (isOutLaps) {
-      outValue = format.number(laps);
-    } else {
-      outValue = format.duration(span);
-    }
   }
 }
 

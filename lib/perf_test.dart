@@ -1,6 +1,7 @@
 /// Support for doing something awesome.
 ///
 /// More dartdocs go here.
+
 library perf_test;
 
 export 'src/perf_test_format.dart';

@@ -15,10 +15,6 @@ class PerfTestLot {
   ///
   final bool isMyStopwatch;
 
-  /// Flag indicating that no output is expected
-  ///
-  final bool isQuiet;
-
   /// Flag indicating that the output value is laps rather span
   ///
   bool isOutLaps = false;
@@ -65,8 +61,7 @@ class PerfTestLot {
       {Stopwatch? stopwatch,
       PerfTestOut? out,
       PerfTestFormat? format,
-      this.isMyStopwatch = false,
-      this.isQuiet = false}) {
+      this.isMyStopwatch = false}) {
     this.format = format ?? PerfTestFormat();
     this.out = out ?? PerfTestOut(this);
     this.stopwatch = stopwatch ?? Stopwatch();
@@ -80,6 +75,11 @@ class PerfTestLot {
   ///
   void createRatios() {
     final testCount = tests.length;
+
+    if (testCount <= 0) {
+      return;
+    }
+
     final isRaw = format.isRaw;
 
     // Collect all single test ratios and calculate max widths
@@ -117,10 +117,6 @@ class PerfTestLot {
       tests[i].exec(maxLaps: maxLaps, maxSpan: maxSpan);
     }
 
-    createRatios();
-
-    if (!isQuiet) {
-      out.exec();
-    }
+    out.exec();
   }
 }
