@@ -1,4 +1,6 @@
-A set of classes to run performance test(s) and compare results against the first test
+A set of classes to run performance test(s) and compare results against the first test.
+
+Most likely, you'll need to add this package name and version to *dev_dependencies* rather than *dependencies*.
 
 ## Features
 
@@ -6,6 +8,7 @@ A set of classes to run performance test(s) and compare results against the firs
 - Display results as either a grid or a field-separated values list (CSV, tab-separated, pipe-separated, etc.)
 - Change the sequence of fields and even break into multiple outputs by manipulating placeholders
 - Turn the stopwatch on and off in your code, achieving better result precision
+- Run tests synchronously or asynchronously when needed
 
 ## Usage
 
@@ -29,26 +32,26 @@ int? laps;
 /// Execute multiple tests with the pretty output
 ///
 void execPretty() => PerfTestLot('\nComparing loops - {M} - {D}')
-  ..add(PerfTestOne('For, "as primary"', testProc: testProc1))
-  ..add(PerfTestOne('ForEx', testProc: testProc2))
-  ..add(PerfTestOne('ForRev', testProc: testProc3))
-  ..add(PerfTestOne('ForEach', testProc: testProc4))
-  ..exec(maxLaps: laps, maxSpan: span);
+  ..add(PerfTestOne('For, "as primary"', testProcSync: testProc1))
+  ..add(PerfTestOne('ForEx', testProcSync: testProc2))
+  ..add(PerfTestOne('ForRev', testProcSync: testProc3))
+  ..add(PerfTestOne('ForEach', testProcSync: testProc4))
+  ..execSync(maxLaps: laps, maxSpan: span);
 
 /// Execute single test with the pretty output
 ///
-void execPrettyOne() => PerfTestOne('For, "as primary"', testProc: testProc1)
+void execPrettyOne() => PerfTestOne('For, "as primary"', testProcSync: testProc1)
     .exec(maxLaps: laps, maxSpan: span);
 
 /// Execute multiple tests with the raw output
 ///
 void execRaw() => PerfTestLot('Comparing loops,{M},',
     isMyStopwatch: true, format: PerfTestFormat.rawCsv)
-  ..add(PerfTestOne('For, "as primary"', testProc: testProc1w))
-  ..add(PerfTestOne('ForEx', testProc: testProc2w))
-  ..add(PerfTestOne('ForRev', testProc: testProc3w))
-  ..add(PerfTestOne('ForEach', testProc: testProc4w))
-  ..exec(maxLaps: laps, maxSpan: span);
+  ..add(PerfTestOne('For, "as primary"', testProcSync: testProc1w))
+  ..add(PerfTestOne('ForEx', testProcSync: testProc2w))
+  ..add(PerfTestOne('ForRev', testProcSync: testProc3w))
+  ..add(PerfTestOne('ForEach', testProcSync: testProc4w))
+  ..execSync(maxLaps: laps, maxSpan: span);
 
 /// The entry point
 ///

@@ -61,9 +61,13 @@ class PerfTestOne {
   ///
   int get value => (isOutLaps ? laps : span.inMilliseconds);
 
-  /// Actual user-defined procedure
+  /// Actual user-defined procedure (asynchronous)
   ///
-  final PerfTestOneProc testProc;
+  final PerfTestOneProc? testProc;
+
+  /// Actual user-defined procedure (synchronous)
+  ///
+  final PerfTestOneProcSync? testProcSync;
 
   /// The constructor
   ///
@@ -77,7 +81,8 @@ class PerfTestOne {
       this.outValue = '',
       this.ratio = 0,
       Stopwatch? stopwatch,
-      this.testProc = emptyTestProc}) {
+      this.testProc,
+      this.testProcSync}) {
     if (format != null) {
       this.format = format;
     }
@@ -86,14 +91,16 @@ class PerfTestOne {
     }
   }
 
-  /// Dummy test proc
+  /// Actual test execution (asynchronous)
   ///
-  static void emptyTestProc(PerfTestOne test, int lapNo) {}
-
-  /// Actual test execution
-  ///
-  PerfTestOne exec({int? maxLaps, Duration? maxSpan}) {
+  Future<PerfTestOne> exec({int? maxLaps, Duration? maxSpan}) async {
     stopwatch.reset();
+
+    final testProc = this.testProc;
+
+    if (testProc == null) {
+      return this;
+    }
 
     isOutLaps = (maxLaps == null);
     num spanAdjustment = 1.0;
@@ -105,7 +112,7 @@ class PerfTestOne {
         if (!isMyStopwatch) {
           stopwatch.start();
         }
-        testProc(this, i);
+        await testProc(this, i);
         if (!isMyStopwatch) {
           stopwatch.stop();
         }
@@ -118,7 +125,7 @@ class PerfTestOne {
         if (!isMyStopwatch) {
           stopwatch.start();
         }
-        testProc(this, laps);
+        await testProc(this, laps);
         if (!isMyStopwatch) {
           stopwatch.stop();
         }
@@ -130,27 +137,60 @@ class PerfTestOne {
       }
     }
 
-    span = durationFromMilliseconds(stopwatch.elapsedMilliseconds);
+    _setSpan(maxSpan, spanAdjustment);
+    _output();
 
-    if ((maxSpan != null) && (spanAdjustment != 1)) {
-      laps = (laps * spanAdjustment).round();
+    return this;
+  }
+
+  /// Actual test execution (synchronous)
+  ///
+  PerfTestOne execSync({int? maxLaps, Duration? maxSpan}) {
+    stopwatch.reset();
+
+    final testProcSync = this.testProcSync;
+
+    if (testProcSync == null) {
+      return this;
     }
 
-    setOutValue();
+    isOutLaps = (maxLaps == null);
+    num spanAdjustment = 1.0;
 
-    if (lot == null) {
-      final tmpLot = PerfTestLot('',
-          stopwatch: stopwatch, isMyStopwatch: isMyStopwatch, format: format)
-        ..add(this);
+    if (maxLaps != null) {
+      laps = maxLaps;
 
-      tmpLot.isOutLaps = isOutLaps;
-      tmpLot.maxLaps = maxLaps;
-      tmpLot.maxSpan = maxSpan;
+      for (var i = 0; i < maxLaps; i++) {
+        if (!isMyStopwatch) {
+          stopwatch.start();
+        }
+        testProcSync(this, i);
+        if (!isMyStopwatch) {
+          stopwatch.stop();
+        }
+      }
+    } else if (maxSpan != null) {
+      laps = 0;
+      final maxMilliseconds = maxSpan.inMilliseconds;
 
-      initLot(tmpLot);
-      tmpLot.out.exec();
-      initLot(null);
+      for (; stopwatch.elapsedMilliseconds < maxMilliseconds; laps++) {
+        if (!isMyStopwatch) {
+          stopwatch.start();
+        }
+        testProcSync(this, laps);
+        if (!isMyStopwatch) {
+          stopwatch.stop();
+        }
+      }
+      if (maxMilliseconds == 0) {
+        spanAdjustment = 0;
+      } else {
+        spanAdjustment = stopwatch.elapsedMilliseconds / maxMilliseconds;
+      }
     }
+
+    _setSpan(maxSpan, spanAdjustment);
+    _output();
 
     return this;
   }
@@ -199,6 +239,38 @@ class PerfTestOne {
     }
 
     outRatio = (ratio < 0 ? '' : format.percent(ratio));
+  }
+
+  /// Set outValue as well as create lot and run the output if lot is not defined
+  ///
+  void _output({int? maxLaps, Duration? maxSpan}) {
+    setOutValue();
+
+    if (lot != null) {
+      return;
+    }
+
+    final tmpLot = PerfTestLot('',
+        stopwatch: stopwatch, isMyStopwatch: isMyStopwatch, format: format)
+      ..add(this);
+
+    tmpLot.isOutLaps = isOutLaps;
+    tmpLot.maxLaps = maxLaps;
+    tmpLot.maxSpan = maxSpan;
+
+    initLot(tmpLot);
+    tmpLot.out.exec();
+    initLot(null);
+  }
+
+  /// Set outValue as well as create lot and run the output if lot is not defined
+  ///
+  void _setSpan(Duration? maxSpan, num spanAdjustment) {
+    span = durationFromMilliseconds(stopwatch.elapsedMilliseconds);
+
+    if ((maxSpan != null) && (spanAdjustment != 1)) {
+      laps = (laps * spanAdjustment).round();
+    }
   }
 }
 

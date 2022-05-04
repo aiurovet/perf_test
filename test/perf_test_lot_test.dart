@@ -15,13 +15,29 @@ void main() {
       lot.add(PerfTestOne(''));
       expect(lot.tests.length, 1);
     });
-    test('exec', () {
+    test('exec', () async {
+      lot.tests.clear();
+      await (lot
+            ..add(PerfTestOne('T1'))
+            ..add(PerfTestOne('T2 T2'))
+            ..add(PerfTestOne('T3 T3 T3')))
+          .exec(maxLaps: 10);
+      expect(lot.tests.length, 3);
+      expect(lot.maxLaps, 10);
+      expect(lot.maxSpan, null);
+      expect(lot.isOutLaps, false);
+      expect(lot.maxNameWidth, 8);
+      expect(lot.tests[0].outRatio, '1.00');
+      expect(lot.tests[1].outRatio, '1.00');
+      expect(lot.tests[2].outRatio, '1.00');
+    });
+    test('execSync', () {
       lot.tests.clear();
       lot
         ..add(PerfTestOne('T1'))
         ..add(PerfTestOne('T2 T2'))
         ..add(PerfTestOne('T3 T3 T3'))
-        ..exec(maxLaps: 10);
+        ..execSync(maxLaps: 10);
       expect(lot.tests.length, 3);
       expect(lot.maxLaps, 10);
       expect(lot.maxSpan, null);

@@ -1,6 +1,11 @@
+## 0.2.0
+
+- Breaking change: `exec` methods in `PerfTestOne` and `PerfTestLot` are renamed to `execSync`, and asynchronous methods `exec` added
+- Breaking change: `testProc` property of `PerfTestOne` renamed to `testProcSync`, and a property `testProc` added.
+
 ## 0.1.3
 
-Extended the package description in pubspec.yaml
+- Extended the package description in pubspec.yaml
 
 ## 0.1.2
 

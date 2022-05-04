@@ -105,9 +105,24 @@ class PerfTestLot {
     }
   }
 
-  /// Execute all tests and output results
+  /// Execute all tests and output results (asynchronous)
   ///
-  void exec({int? maxLaps, Duration? maxSpan}) {
+  Future exec({int? maxLaps, Duration? maxSpan}) async {
+    this.maxLaps = maxLaps;
+    this.maxSpan = maxSpan;
+
+    isOutLaps = (maxLaps == null);
+
+    for (var i = 0, n = tests.length; i < n; i++) {
+      await tests[i].exec(maxLaps: maxLaps, maxSpan: maxSpan);
+    }
+
+    out.exec();
+  }
+
+  /// Execute all tests and output results (synchronous)
+  ///
+  void execSync({int? maxLaps, Duration? maxSpan}) {
     this.maxLaps = maxLaps;
     this.maxSpan = maxSpan;
 
