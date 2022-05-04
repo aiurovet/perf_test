@@ -4,19 +4,32 @@
 import 'package:perf_test/perf_test.dart';
 import 'package:test/test.dart';
 
+Future testProc(PerfTestOne test, int lapNo) async {}
+
+void testProcSync(PerfTestOne test, int lapNo) {}
+
 /// Unit tests for PerfTestFormat
 ///
 void main() {
   group('PerfTestOne -', () {
-    final t1 = PerfTestOne('T1', format: PerfTestFormat(isQuiet: true));
+    final t1 = PerfTestOne('T1',
+        format: PerfTestFormat(isQuiet: true),
+        testProc: testProc,
+        testProcSync: testProcSync);
 
     setUp(() {
       t1.isOutLaps = true;
       t1.laps = 12;
       t1.span = Duration(seconds: 3, milliseconds: 456);
     });
-    test('exec', () {
-      t1.exec(maxLaps: 10);
+    test('exec', () async {
+      await t1.exec(maxLaps: 10);
+      expect(t1.lot, null);
+      expect(t1.ratio, 1);
+      expect(t1.outRatio, '1.00');
+    });
+    test('execSync', () {
+      t1.execSync(maxLaps: 10);
       expect(t1.lot, null);
       expect(t1.ratio, 1);
       expect(t1.outRatio, '1.00');
