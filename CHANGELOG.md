@@ -1,3 +1,9 @@
+## 0.2.1
+
+- Fixed sync calls in PerfTestLot.execSync
+- Fixed sync/async calls in the example
+- Got rid of unnecessary function durationFromMicroseconds and durationFromMilliseconds
+
 ## 0.2.0
 
 - Breaking change: `exec` methods in `PerfTestOne` and `PerfTestLot` are renamed to `execSync`, and asynchronous methods `exec` added

@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 /// Unit tests for PerfTestFormat
 ///
 void main() {
-  group('PerfTestLot - ', () {
+  group('PerfTestLot -', () {
     final lot = PerfTestLot('Lot', format: PerfTestFormat(isQuiet: true));
 
     test('add one', () {
