@@ -17,7 +17,7 @@ int? laps;
 
 /// Execute multiple tests with the pretty output
 ///
-void execPretty() => PerfTestLot('\nComparing loops - {M} - {D}')
+void execPrettySync() => PerfTestLot('\nComparing loops - {M} - {D}')
   ..add(PerfTestOne('For, "as primary"', testProcSync: testProc1))
   ..add(PerfTestOne('ForEx', testProcSync: testProc2))
   ..add(PerfTestOne('ForRev', testProcSync: testProc3))
@@ -26,28 +26,28 @@ void execPretty() => PerfTestLot('\nComparing loops - {M} - {D}')
 
 /// Execute single test with the pretty output
 ///
-void execPrettyOne() =>
+void execPrettyOneSync() =>
     PerfTestOne('For, "as primary"', testProcSync: testProc1)
-        .exec(maxLaps: laps, maxSpan: span);
+        .execSync(maxLaps: laps, maxSpan: span);
 
 /// Execute multiple tests with the raw output
 ///
-void execRaw() => PerfTestLot('Comparing loops,{M},',
-    isMyStopwatch: true, format: PerfTestFormat.rawCsv)
-  ..add(PerfTestOne('For, "as primary"', testProcSync: testProc1w))
-  ..add(PerfTestOne('ForEx', testProcSync: testProc2w))
-  ..add(PerfTestOne('ForRev', testProcSync: testProc3w))
-  ..add(PerfTestOne('ForEach', testProcSync: testProc4w))
-  ..execSync(maxLaps: laps, maxSpan: span);
+Future execRaw() async => await (PerfTestLot('Comparing loops,{M},',
+        isMyStopwatch: true, format: PerfTestFormat.rawCsv)
+      ..add(PerfTestOne('For, "as primary"', testProc: testProc1w))
+      ..add(PerfTestOne('ForEx', testProc: testProc2w))
+      ..add(PerfTestOne('ForRev', testProc: testProc3w))
+      ..add(PerfTestOne('ForEach', testProc: testProc4w)))
+    .exec(maxLaps: laps, maxSpan: span);
 
 /// The entry point
 ///
-void main(List<String> args) {
+Future main(List<String> args) async {
   parseArgs(args);
   setUp();
-  execPrettyOne();
-  execPretty();
-  execRaw();
+  execPrettyOneSync();
+  execPrettySync();
+  await execRaw();
 }
 
 /// Parse command-line arguments
@@ -63,7 +63,7 @@ void parseArgs(List<String> args) {
       case '-t':
         milliseconds =
             (num.parse(args[1]) * Duration.millisecondsPerSecond).floor();
-        span = durationFromMilliseconds(milliseconds);
+        span = Duration(milliseconds: milliseconds);
         break;
     }
   }
@@ -92,7 +92,7 @@ void testProc1(PerfTestOne test, int lapNo) {
 
 /// Performance test #1 with the user-controlled stopwatch
 ///
-void testProc1w(PerfTestOne test, int lapNo) {
+Future testProc1w(PerfTestOne test, int lapNo) async {
   test.stopwatch.start();
 
   for (var i = 0, n = codeUnits.length; i < n; i++) {
@@ -115,7 +115,7 @@ void testProc2(PerfTestOne test, int lapNo) {
 
 /// Performance test #2 with the user-controlled stopwatch
 ///
-void testProc2w(PerfTestOne test, int lapNo) {
+Future testProc2w(PerfTestOne test, int lapNo) async {
   test.stopwatch.start();
 
   for (var i = 0, n = codeUnits.length; i < n; i++) {
@@ -138,7 +138,7 @@ void testProc3(PerfTestOne test, int lapNo) {
 
 /// Performance test #3 with the user-controlled stopwatch
 ///
-void testProc3w(PerfTestOne test, int lapNo) {
+Future testProc3w(PerfTestOne test, int lapNo) async {
   test.stopwatch.start();
 
   for (var i = codeUnits.length; --i >= 0;) {
@@ -160,7 +160,7 @@ void testProc4(PerfTestOne test, int lapNo) {
 
 /// Performance test #4 with the user-controlled stopwatch
 ///
-void testProc4w(PerfTestOne test, int lapNo) {
+Future testProc4w(PerfTestOne test, int lapNo) async {
   test.stopwatch.start();
 
   for (var c in codeUnits) {
