@@ -1,6 +1,6 @@
 name: perf_test
 description: A set of classes to run performance test(s) and compare results against the first test
-version: 0.2.0
+version: 0.2.1
 homepage: https://github.com/aiurovet/perf_test/
 
 environment:

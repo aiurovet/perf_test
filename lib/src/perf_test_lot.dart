@@ -129,7 +129,7 @@ class PerfTestLot {
     isOutLaps = (maxLaps == null);
 
     for (var i = 0, n = tests.length; i < n; i++) {
-      tests[i].exec(maxLaps: maxLaps, maxSpan: maxSpan);
+      tests[i].execSync(maxLaps: maxLaps, maxSpan: maxSpan);
     }
 
     out.exec();

@@ -113,9 +113,7 @@ class PerfTestOne {
           stopwatch.start();
         }
         await testProc(this, i);
-        if (!isMyStopwatch) {
-          stopwatch.stop();
-        }
+        stopwatch.stop(); // no need to spend time on checking isMyStopwatch
       }
     } else if (maxSpan != null) {
       laps = 0;
@@ -126,9 +124,7 @@ class PerfTestOne {
           stopwatch.start();
         }
         await testProc(this, laps);
-        if (!isMyStopwatch) {
-          stopwatch.stop();
-        }
+        stopwatch.stop(); // no need to spend time on checking isMyStopwatch
       }
       if (maxMilliseconds == 0) {
         spanAdjustment = 0;
@@ -165,9 +161,7 @@ class PerfTestOne {
           stopwatch.start();
         }
         testProcSync(this, i);
-        if (!isMyStopwatch) {
-          stopwatch.stop();
-        }
+        stopwatch.stop(); // no need to spend time on checking isMyStopwatch
       }
     } else if (maxSpan != null) {
       laps = 0;
@@ -178,9 +172,7 @@ class PerfTestOne {
           stopwatch.start();
         }
         testProcSync(this, laps);
-        if (!isMyStopwatch) {
-          stopwatch.stop();
-        }
+        stopwatch.stop(); // no need to spend time on checking isMyStopwatch
       }
       if (maxMilliseconds == 0) {
         spanAdjustment = 0;
@@ -266,7 +258,7 @@ class PerfTestOne {
   /// Set outValue as well as create lot and run the output if lot is not defined
   ///
   void _setSpan(Duration? maxSpan, num spanAdjustment) {
-    span = durationFromMilliseconds(stopwatch.elapsedMilliseconds);
+    span = Duration(milliseconds: stopwatch.elapsedMilliseconds);
 
     if ((maxSpan != null) && (spanAdjustment != 1)) {
       laps = (laps * spanAdjustment).round();
@@ -274,15 +266,20 @@ class PerfTestOne {
   }
 }
 
+/*
 /// Helper static method to create Duration from a total number of milliseconds
 ///
 Duration durationFromMilliseconds(int totalMilliseconds) =>
-    durationFromMicroseconds(
-        totalMilliseconds * Duration.microsecondsPerMillisecond);
+  Duration(milliseconds: totalMilliseconds);
 
 /// Helper static method to create Duration from a total number of microseconds
 ///
-Duration durationFromMicroseconds(int totalMicroseconds) {
+Duration durationFromMicroseconds(int totalMicroseconds) =>
+  Duration(microseconds: totalMicroseconds);
+
+/// Helper static method to create Duration from a total number of microseconds
+///
+Duration durationFromMicrosecondsOld(int totalMicroseconds) {
   final days = totalMicroseconds ~/ Duration.microsecondsPerDay;
   totalMicroseconds -= days * Duration.microsecondsPerDay;
 
@@ -306,3 +303,4 @@ Duration durationFromMicroseconds(int totalMicroseconds) {
       milliseconds: milliseconds,
       microseconds: totalMicroseconds);
 }
+*/

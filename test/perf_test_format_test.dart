@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 /// Unit tests for PerfTestFormat
 ///
 void main() {
-  group('PerfTestFormat - date - ', () {
+  group('PerfTestFormat - date -', () {
     test('default', () {
       final now = DateTime.now();
       expect(PerfTestFormat().date(now), DateFormat().format(now));
@@ -24,7 +24,7 @@ void main() {
       expect(PerfTestFormat(isRaw: true).date(now, 10), now.toString());
     });
   });
-  group('PerfTestFormat - duration - ', () {
+  group('PerfTestFormat - duration -', () {
     test('default', () {
       final duration = Duration(minutes: 1, seconds: 23, milliseconds: 456);
       expect(PerfTestFormat().duration(duration), '0:01:23.456');
@@ -34,7 +34,7 @@ void main() {
       expect(PerfTestFormat().duration(duration, 6), '0:01:23.456000');
     });
   });
-  group('PerfTestFormat - number - ', () {
+  group('PerfTestFormat - number -', () {
     test('default', () {
       expect(PerfTestFormat().number(1234.56), NumberFormat().format(1234.56));
     });
@@ -51,13 +51,13 @@ void main() {
           PerfTestFormat(isRaw: true).number(1234.56, 10), 1234.56.toString());
     });
   });
-  group('PerfTestFormat - percent - ', () {
+  group('PerfTestFormat - percent -', () {
     test('default', () {
       expect(PerfTestFormat(usePercent: true).percent(1234.56),
           NumberFormat.percentPattern().format(1234.56));
     });
   });
-  group('PerfTestFormat - string - ', () {
+  group('PerfTestFormat - string -', () {
     test('default', () {
       expect(PerfTestFormat().string('abc'), 'abc');
     });
