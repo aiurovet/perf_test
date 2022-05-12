@@ -1,3 +1,7 @@
+## 0.2.2
+
+- Changed the project homepage
+
 ## 0.2.1
 
 - Fixed sync calls in PerfTestLot.execSync
