@@ -1,7 +1,9 @@
 // Copyright (c) 2022, Alexander Iurovetski
 // All rights reserved under MIT license (see LICENSE file)
 
+import 'package:lim/lim.dart';
 import 'package:perf_test/perf_test.dart';
+import 'package:random_unicode/random_unicode.dart';
 
 /// Generic argument to generate any kind of test data
 ///
@@ -22,37 +24,13 @@ class PerfTestArg {
   ///
   static final Duration defaultStepForDateTime = Duration(days: 1);
 
-  /// Maximum DateTime value
+  /// The value of a step indicating taking a random value
   ///
-  static final DateTime maxDateTime = DateTime.utc(275760, 09, 13);
-
-  /// Minimum DateTime value
-  ///
-  static final DateTime minDateTime = DateTime.utc(-271821, 04, 20);
-
-  /// Maximum int value
-  ///
-  static const int maxInt =  9007199254740991;
-
-  /// Minimum int value
-  ///
-  static const int minInt = -9007199254740992;
-
-  /// Maximum num value
-  ///
-  static const num maxNum =  9223372036854775807;
-
-  /// Minimum num value
-  ///
-  static const num minNum = -9223372036854775808;
+  static const num randomStep = 0;
 
   /// The maximum value of a range
   ///
   Object? current;
-
-  /// Type of the argument
-  ///
-  late final PerfTestArgType type;
 
   /// Flag indicating all values have been exhausted
   ///
@@ -60,92 +38,120 @@ class PerfTestArg {
 
   /// The list of (non-unique) values
   ///
-  Iterable iterable = defaultIterable;
+  late final Iterable iterable;
 
   /// Maximum DateTime value of a range
   ///
-  DateTime dateTimeMax = maxDateTime;
+  late final DateTime dateTimeMax;
 
   /// Minimum DateTime value of a range
   ///
-  DateTime dateTimeMin = minDateTime;
+  late final DateTime dateTimeMin;
 
   /// Step for the DateTime range
   ///
-  Duration dateTimeStep = defaultStepForDateTime;
+  late final Duration dateTimeStep;
 
   /// Maximum int value of a range
   ///
-  int intMax = maxInt;
+  late final int intMax;
 
   /// Minimum int value of a range
   ///
-  int intMin = minInt;
+  late final int intMin;
 
   /// Step for the int range
   ///
-  int intStep = defaultStepForInt;
+  late final int intStep;
+
+  /// Flag indicating random value pick up
+  ///
+  late final bool isRandom;
 
   /// Maximum num value of a range
   ///
-  num numMax = maxNum;
+  late final num numMax;
 
   /// Minimum num value of a range
   ///
-  num numMin = minNum;
+  late final num numMin;
 
   /// Step for the num range
   ///
-  num numStep = defaultStepForNum;
+  late final num numStep;
+
+  /// Random unicode string generator
+  /// 
+  late final RandomUnicode? randomUnicode;
+
+  /// Scope of the argument
+  ///
+  late final PerfTestArgScope scope;
 
   /// The constructor
   ///
-  PerfTestArg({Iterable? iterable, Object? min, Object? max, Object? step}) {
+  PerfTestArg({Iterable? iterable, Object? min, Object? max, Object? step, RandomUnicode? randomUnicode}) {
+    isRandom = (((step is num) && (step == randomStep)) || (randomUnicode != null));
+
     if (iterable != null) {
-      type = PerfTestArgType.iterable;
+      scope = PerfTestArgScope.iterable;
       this.iterable = iterable;
     } else if ((min is int) || (max is int) || (step is int)) {
-      type = PerfTestArgType.int;
-      intMin = ((min as int?)  ?? minInt);
-      intMax = ((max as int?)  ?? maxInt);
+      scope = PerfTestArgScope.intRange;
+      intMin = ((min as int?) ?? Lim.minInt);
+      intMax = ((max as int?) ?? Lim.maxInt);
       intStep = ((step as int?) ?? defaultStepForInt);
     } else if ((min is num) || (max is num) || (step is num)) {
-      type = PerfTestArgType.num;
-      numMin = ((min as num?)  ?? minNum);
-      numMax = ((max as num?)  ?? maxNum);
-      numStep = ((step as int?) ?? defaultStepForInt);
+      scope = PerfTestArgScope.numRange;
+      numMin = ((min as num?) ?? Lim.minNum);
+      numMax = ((max as num?) ?? Lim.maxNum);
+      numStep = ((step as num?) ?? defaultStepForNum);
     } else if ((min is DateTime) || (max is DateTime) || (step is Duration)) {
-      type = PerfTestArgType.num;
-      dateTimeMin = ((min as DateTime?) ?? minDateTime);
-      dateTimeMax = ((max as DateTime?) ?? maxDateTime);
+      scope = PerfTestArgScope.numRange;
+      dateTimeMin = ((min as DateTime?) ?? Lim.minDateTime);
+      dateTimeMax = ((max as DateTime?) ?? Lim.maxDateTime);
       dateTimeStep = ((step as Duration?) ?? defaultStepForDateTime);
+      intMin = dateTimeMin.microsecondsSinceEpoch;
+      intMax = dateTimeMax.microsecondsSinceEpoch;
+    } else if (randomUnicode != null) {
+      scope = PerfTestArgScope.stringRange;
+      this.randomUnicode = randomUnicode;
+      intMin = ((min as int?) ?? Lim.minCharCode);
+      intMax = ((max as int?) ?? Lim.maxCharCode);
     } else {
-      type = PerfTestArgType.unknown;
+      scope = PerfTestArgScope.unknown;
     }
 
     reset();
   }
 
   Object? moveNext() {
-    switch (type) {
-      case PerfTestArgType.dateTime:
-        var cur = current as DateTime;
-        isFinished = (cur == dateTimeMax);
-        current = (isFinished ? dateTimeMin : cur.add(dateTimeStep));
+    switch (scope) {
+      case PerfTestArgScope.dateTimeRange:
+        if (isRandom) {
+          intMin ;
+        } else {
+          final cur = current as DateTime;
+          isFinished = (cur == dateTimeMax);
+          current = (isFinished ? dateTimeMin : cur.add(dateTimeStep));
+        }
         break;
-      case PerfTestArgType.int:
+      case PerfTestArgScope.intRange:
         var cur = current as int;
         isFinished = (cur == intMax);
         current = (isFinished ? intMin : cur + intStep);
         break;
-      case PerfTestArgType.iterable:
+      case PerfTestArgScope.iterable:
         final itr = iterable.iterator;
         current = (itr.moveNext() ? itr.current : iterable.first);
         break;
-      case PerfTestArgType.num:
+      case PerfTestArgScope.numRange:
         var cur = current as num;
         isFinished = (cur == numMax);
         current = (isFinished ? numMin : cur + numStep);
+        break;
+      case PerfTestArgScope.stringRange:
+        current = randomUnicode!.string(intMin, intMax);
         break;
       default:
         current = null;
@@ -155,17 +161,17 @@ class PerfTestArg {
   }
 
   Object? reset() {
-    switch (type) {
-      case PerfTestArgType.dateTime:
+    switch (scope) {
+      case PerfTestArgScope.dateTimeRange:
         current = dateTimeMin;
         break;
-      case PerfTestArgType.int:
+      case PerfTestArgScope.intRange:
         current = intMin;
         break;
-      case PerfTestArgType.iterable:
+      case PerfTestArgScope.iterable:
         current = iterable.first;
         break;
-      case PerfTestArgType.num:
+      case PerfTestArgScope.numRange:
         current = numMin;
         break;
       default:

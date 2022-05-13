@@ -3,10 +3,11 @@
 
 /// Type of generic argument
 ///
-enum PerfTestArgType {
+enum PerfTestArgScope {
   unknown,
-  dateTime,
-  int,
+  dateTimeRange,
+  intRange,
   iterable,
-  num,
+  numRange,
+  stringRange
 }
