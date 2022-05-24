@@ -4,8 +4,6 @@
 
 library perf_test;
 
-export 'src/perf_test_arg_int_range.dart';
-export 'src/perf_test_arg_range.dart';
 export 'src/perf_test_arg_scope.dart';
 export 'src/perf_test_arg.dart';
 export 'src/perf_test_format.dart';
