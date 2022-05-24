@@ -1,7 +1,8 @@
-/// Support for doing something awesome.
-///
-/// More dartdocs go here.
+// Copyright (c) 2022, Alexander Iurovetski
+// All rights reserved under MIT license (see LICENSE file)
 
+/// perf_test exports
+///
 library perf_test;
 
 export 'src/perf_test_format.dart';
