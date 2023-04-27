@@ -1,3 +1,7 @@
+## 0.2.4
+
+- Website changed
+
 ## 0.2.3
 
 - Upgraded compiler version to 2.17
