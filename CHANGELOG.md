@@ -1,3 +1,7 @@
+## 0.2.5
+
+- Upgraded packages
+
 ## 0.2.4
 
 - Website changed
